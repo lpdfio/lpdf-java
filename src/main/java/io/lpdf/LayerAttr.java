@@ -1,0 +1,91 @@
+// Generated from lpdf.xsd by scripts/gen-sdk-api.mjs.
+// Do not edit: change the schema and run `make gen-sdk-api`.
+package io.lpdf;
+
+/**
+ * Draws shapes, text, images and barcodes at exact positions on the page, independent of the flowing layout:
+ * watermarks, stamps, page furniture. Coordinates start at the top left corner of the whole page, not inside the
+ * layout's margin, and y grows downward. A layer before the section's layout paints under it, and one after paints over
+ * it. It sets what applies to all of its content: which pages it appears on, opacity, transform and clip, and the font,
+ * size and color of its text. Layers cannot be nested.
+ */
+public final class LayerAttr extends Attributes {
+    /** Attributes with none set. */
+    public LayerAttr() {
+        super("layer");
+    }
+
+    /**
+     * Which pages of the section show the layer: each, first, last, odd, even, or a range such as 2-last. odd and even
+     * follow the number printed on the page, so in a section that starts on page 4 even shows on its first page. first,
+     * last and ranges count the section's own pages, whatever their numbers. Defaults to each.
+     */
+    public LayerAttr page(String page) {
+        set("page", page);
+        return this;
+    }
+
+    /** How opaque everything in the layer is, from 0 to 1. To fade one element, put it in a layer of its own. */
+    public LayerAttr opacity(double opacity) {
+        set("opacity", opacity);
+        return this;
+    }
+
+    public LayerAttr transform(String transform) {
+        set("transform", transform);
+        return this;
+    }
+
+    /**
+     * A rectangle that cuts off what the layer draws outside it: x y w h, in points from the top left corner of the
+     * page.
+     */
+    public LayerAttr clip(String clip) {
+        set("clip", clip);
+        return this;
+    }
+
+    /** The font of the text-at in the layer that sets none of its own. Defaults to the font of the document. */
+    public LayerAttr font(String font) {
+        set("font", font);
+        return this;
+    }
+
+    /** The size of the text-at in the layer that sets none of its own. Defaults to 11pt. */
+    public LayerAttr fontSize(String fontSize) {
+        set("font-size", fontSize);
+        return this;
+    }
+
+    /** The color of the text-at in the layer that sets none of its own. Defaults to the text token. */
+    public LayerAttr color(String color) {
+        set("color", color);
+        return this;
+    }
+
+    /**
+     * In a tagged document, one with pdfua or a pdfa of level a, what the layer shows, which a screen reader reads as
+     * one figure at the layer's place in the document: a layer before the layout before it, one after the layout after
+     * it. Without alt a layer is decoration, as a header is, and a screen reader skips it with all its text: a
+     * watermark, a running title, a logo's letters. A document that is not tagged ignores it.
+     */
+    public LayerAttr alt(String alt) {
+        set("alt", alt);
+        return this;
+    }
+
+    /**
+     * Puts the element, and everything in it, in an optional content group, which the viewer shows or hides. print:
+     * printed, and not shown on screen. screen: shown on screen, and not printed. The element keeps its room either
+     * way, so nothing moves. An element with a group inside an element with another shows only where both show.
+     * Acrobat, Chrome and Firefox switch the groups; Preview and Safari show everything, on screen and in print. Hidden
+     * content is still in the file, where it can be selected and copied: it is not a way to keep anything secret. A
+     * link in print content is drawn and does nothing, and a form field can't be in print content: use a frame with a
+     * border for a box filled in by hand. With pdfa or pdfua on the output, everything shows. With pdfx, the file is
+     * the print version: screen content stays in it, off, and a reader can turn it on in a layers panel.
+     */
+    public LayerAttr ocg(String ocg) {
+        set("ocg", ocg);
+        return this;
+    }
+}
