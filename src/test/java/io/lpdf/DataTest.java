@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/** The data a template binds, given as objects or as JSON text. */
+/** The data a template binds, given as objects (maps, lists, records) or as JSON text. */
 class DataTest {
     private static final String TEMPLATE = """
             <lpdf version="1"><document><section><layout>
@@ -51,6 +51,39 @@ class DataTest {
         for (var text : List.of("{}", "[]", "null", "\"a\"", "-0.5e-3", "12345678901234567890", " { \"a\": [true, false, null] } ")) {
             new RenderOptions().dataJson(text);
         }
+    }
+
+    record Item(String label) {
+    }
+
+    record Items(List<Item> items, boolean premium) {
+    }
+
+    @Test
+    void a_record_binds_as_an_object_of_its_components() {
+        var xml = """
+                <lpdf version="1"><document><section><layout>
+                  <column data-source="items"><text data-value="label">Fallback</text></column>
+                  <text data-if="premium">Premium only</text>
+                </layout></section></document></lpdf>""";
+
+        var fromRecord = engine.render(xml, new RenderOptions().data(
+                new Items(List.of(new Item("Alpha"), new Item("Beta"), new Item("Gamma")), false)));
+        var fromJson = engine.render(xml, new RenderOptions().dataJson("""
+                {"items": [{"label": "Alpha"}, {"label": "Beta"}, {"label": "Gamma"}], "premium": false}"""));
+        var premium = engine.render(xml, new RenderOptions().data(
+                new Items(List.of(new Item("Alpha"), new Item("Beta"), new Item("Gamma")), true)));
+
+        assertArrayEquals(fromJson, fromRecord);
+        assertFalse(Arrays.equals(fromRecord, premium), "data-if read no data");
+    }
+
+    @Test
+    void a_template_renders_its_own_content_without_data() {
+        var fallback = engine.render(TEMPLATE);
+        var bound = engine.render(TEMPLATE, new RenderOptions().dataJson("{\"customer\": {\"name\": \"Ada\"}, \"total\": 1}"));
+
+        assertFalse(Arrays.equals(fallback, bound));
     }
 
     @Test
