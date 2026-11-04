@@ -80,6 +80,12 @@
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- For the tests only: WebAssembly text to a module, for the small modules that stand in for the engine. -->
+    <dependency>
+      <groupId>run.endive</groupId>
+      <artifactId>wabt</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

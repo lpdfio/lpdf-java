@@ -89,16 +89,20 @@ final class WasmRunner {
      * which stops the module within about a millisecond, and the next call on any engine runs as usual.
      */
     private String run(String request) {
-        if (timeout == 0) return execute(request);
+        if (timeout == 0) {
+            try {
+                return execute(request);
+            } catch (WasmInterruptedException e) {
+                throw interrupted(e);
+            }
+        }
         var deadline = new Deadline(Thread.currentThread());
         var timer = Timer.INSTANCE.schedule(deadline::expire, timeout, TimeUnit.SECONDS);
         try {
             return execute(request);
         } catch (WasmInterruptedException e) {
             if (deadline.finish()) throw new EngineException("The render timed out after " + seconds(timeout) + ".", e);
-            // Someone else's interrupt, such as the app's own: it stays set for the app to see.
-            Thread.currentThread().interrupt();
-            throw new EngineException("The render was interrupted.", e);
+            throw interrupted(e);
         } finally {
             timer.cancel(false);
             // A deadline that passed just as the module finished interrupted nothing that runs; its flag is cleared.
@@ -133,6 +137,12 @@ final class WasmRunner {
             throw new EngineException(EngineException.CRASHED, e);
         }
         return stdout.toString(StandardCharsets.UTF_8);
+    }
+
+    /** The error of a call stopped by an interrupt other than its deadline's, such as the app's own, which stays set. */
+    private static EngineException interrupted(WasmInterruptedException e) {
+        Thread.currentThread().interrupt();
+        return new EngineException("The render was interrupted.", e);
     }
 
     private static String seconds(int count) {
