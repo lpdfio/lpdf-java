@@ -1,0 +1,274 @@
+name: Release
+run-name: "Release ${{ github.event.client_payload.version || github.ref_name }} to Maven Central (${{ github.event_name == 'repository_dispatch' && 'core' || 'adapter' }})"
+
+on:
+  repository_dispatch:
+    types: [core-release]
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    # A run dispatched by core's release was approved there, on core's `release`. A package patch is
+    # a tag pushed here, and waits for this repo's own `release` approval.
+    environment: ${{ github.event_name == 'repository_dispatch' && 'release-core' || 'release' }}
+    permissions:
+      actions: read      # lists this repo's rc.yml runs, for the check after "Resolve version"
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      # ── Resolve version ──────────────────────────────────────────────────────
+      - name: Resolve version
+        run: |
+          ADAPTER_TAG="${{ github.event.client_payload.version || github.ref_name }}"
+          CORE_TAG=$(echo "$ADAPTER_TAG" | sed 's/\.[0-9]*$/.0/')
+          VERSION="${ADAPTER_TAG#v}"
+          echo "ADAPTER_TAG=$ADAPTER_TAG"   >> "$GITHUB_ENV"
+          echo "CORE_TAG=$CORE_TAG"         >> "$GITHUB_ENV"
+          echo "VERSION=$VERSION"           >> "$GITHUB_ENV"
+
+      # ── Require main to be what the release candidate tested ─────────────────
+      # A core release is approved once, on core's `release`, so this run waits for nobody. This
+      # check stands where the other clicks did. This repo's rc.yml built and tested `main` as it was
+      # when the RC was dispatched, and this run builds `main` as it is now: the two must be the same
+      # commit, apart from the bots' changelog and release commits, or what ships was never tested
+      # by an RC. Another RC on the same core commit tests the newer `main`; then send this repo
+      # `core-release` again, since a re-run builds the commit of the first run.
+      # A package patch is released by pushing its tag. It has no RC, and keeps its approval.
+      - name: Require main to be what the release candidate tested
+        if: github.event_name == 'repository_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ "$ADAPTER_TAG" != "$CORE_TAG" ]; then
+            echo "::error::A core release dispatches vX.Y.0, and this dispatch carries $ADAPTER_TAG. A package patch is released by pushing its tag."
+            exit 1
+          fi
+
+          # The newest RC of this version on the commit being released that has a green run here.
+          RELEASE_SHA=$(gh api "repos/lpdfio/lpdf/commits/$CORE_TAG" --jq .sha)
+          RC_TAG=""
+          for RC in $(gh api "repos/lpdfio/lpdf/git/matching-refs/tags/${CORE_TAG}-rc." --jq '.[].ref | ltrimstr("refs/tags/")' | sort -V -r); do
+            [ "$(gh api "repos/lpdfio/lpdf/commits/$RC" --jq .sha)" = "$RELEASE_SHA" ] || continue
+            RC_SHA=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow rc.yml --event repository_dispatch --status success --limit 100 \
+              --json displayTitle,headSha | jq -r --arg title "RC $RC:" 'map(select(.displayTitle | startswith($title))) | .[0].headSha // empty')
+            if [ -n "$RC_SHA" ]; then RC_TAG=$RC; break; fi
+          done
+          if [ -z "$RC_TAG" ]; then
+            echo "::error::No green rc.yml run here for a release candidate of $CORE_TAG on its commit ${RELEASE_SHA:0:7}. Cut one, and check its runs, before releasing."
+            exit 1
+          fi
+
+          COMPARE=$(gh api "repos/$GITHUB_REPOSITORY/compare/$RC_SHA...$GITHUB_SHA")
+          STATUS=$(jq -r .status <<<"$COMPARE")
+          NEWER=$(jq -r '.commits[] | select(.commit.message | test("^(changelog|release): ") | not) | "  \(.sha[0:7]) \(.commit.message | split("\n")[0])"' <<<"$COMPARE")
+          if { [ "$STATUS" != identical ] && [ "$STATUS" != ahead ]; } || [ -n "$NEWER" ]; then
+            echo "::error::main has moved since $RC_TAG was tested: rc.yml ran on ${RC_SHA:0:7} and this run builds ${GITHUB_SHA:0:7} ($STATUS). Cut another RC on ${RELEASE_SHA:0:7}, then send this repo core-release again."
+            [ -z "$NEWER" ] || printf 'Commits since %s:\n%s\n' "${RC_SHA:0:7}" "$NEWER"
+            exit 1
+          fi
+          echo "main is ${GITHUB_SHA:0:7}, the commit $RC_TAG tested here (${RC_SHA:0:7})."
+
+      # ── Download WASI binary from core release ───────────────────────────────
+      - name: Download lpdf-wasi.wasm
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p wasm
+          DOWNLOADED=""
+          for attempt in 1 2 3; do
+            gh release download "$CORE_TAG" \
+              --repo lpdfio/lpdf \
+              --pattern "lpdf-wasi.wasm" \
+              --dir wasm \
+              --clobber && DOWNLOADED=1 && break
+            echo "Attempt $attempt failed — retrying in 10s..."
+            sleep 10
+          done
+          # No fallback to the latest core: vX.Y.Z must ship engine vX.Y.0
+          # (var/VERSIONING.md in lpdfio/lpdf). ci.yml keeps its fallback.
+          if [ -z "$DOWNLOADED" ]; then
+            echo "::error::Could not download core $CORE_TAG. This release must ship engine $CORE_TAG — publish that core release first, or check the tag."
+            exit 1
+          fi
+          mv wasm/lpdf-wasi.wasm wasm/lpdf.wasm   # Endive's plugin compiles wasm/lpdf.wasm
+
+      # ── Build and test ───────────────────────────────────────────────────────
+      # The settings.xml it writes gives the server `central` the user and password of these
+      # variables, which the publish step below sets from the environment's secrets.
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          server-id: central
+          server-username: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
+
+      - name: Set the version in the pom
+        run: |
+          sed -i "s|<version>0.0.0-SNAPSHOT</version>|<version>$VERSION</version>|" pom.xml
+          grep -q "<version>$VERSION</version>" pom.xml
+
+      # ── Fetch test fixtures and snapshots from core ──────────────────────────
+      # The fixture XML files and golden SHA-256 snapshots live in the core
+      # monorepo (lpdfio/lpdf).  Sparse-clone only those two directories so
+      # that snapshot tests can actually run in this adapter's CI.
+      # Cloned at CORE_TAG, the engine this release ships, so the snapshots
+      # match it even after core's main has moved on (e.g. between an RC and
+      # the final release).
+      - name: Fetch test fixtures and snapshots from core
+        run: |
+          git clone --depth 1 --branch "$CORE_TAG" --filter=blob:none --sparse \
+            https://github.com/lpdfio/lpdf.git _core
+          git -C _core sparse-checkout set test/fixtures test/snapshots
+          mkdir -p test/fixtures test/snapshots
+          cp -r _core/test/fixtures/. test/fixtures/
+          cp -r _core/test/snapshots/. test/snapshots/
+          rm -rf _core
+
+      - name: Build and test
+        run: mvn -B verify
+
+      # ── Publish ──────────────────────────────────────────────────────────────
+      # Maven Central refuses a version it has. A re-run after a later step failed
+      # finds it there and goes on to the changelog, as NuGet's --skip-duplicate
+      # does in the .NET SDK.
+      - name: Check whether Maven Central has this version
+        id: central
+        run: |
+          if curl -sfI "https://repo1.maven.org/maven2/io/lpdf/lpdf/$VERSION/lpdf-$VERSION.pom" >/dev/null; then
+            echo "::notice::io.lpdf:lpdf $VERSION is on Maven Central already: not published again."
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # The release profile adds the sources, the Javadoc and a GPG signature of
+      # each file, and publishes the bundle through the Central Portal, waiting
+      # until Central has published it. The key that signs and the Portal's token
+      # are secrets of this job's environments: maven-gpg-plugin reads the key and
+      # its passphrase from MAVEN_GPG_KEY and MAVEN_GPG_PASSPHRASE.
+      - name: Publish to Maven Central
+        if: steps.central.outputs.published != 'true'
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          MAVEN_GPG_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: mvn -B -P release deploy -DskipTests
+
+      # main's ruleset takes changes through a PR only, and the lpdf release App
+      # is its one bypass actor. So the changelog commit below is pushed with a
+      # token of that App, minted here for this repo. The App's key is a secret
+      # of this job's environments, never of the repo. `release` waits for the
+      # user's approval. `release-core` has no reviewer, so it is limited to
+      # main: only a workflow merged there can read the key.
+      - name: Mint GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.LPDF_RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.LPDF_RELEASE_APP_PRIVATE_KEY }}
+
+      # ── Changelog ────────────────────────────────────────────────────────────
+      # Writes this release's notes into CHANGELOG.md on main, and hands the
+      # same text to the release step below so the file and the Releases page
+      # can't disagree.
+      #
+      # Runs BEFORE the tag is created, so the tag contains its own entry.
+      #
+      # Fails the job on error, deliberately — this path is unproven. Relax to
+      # warn-only once a core release has exercised it (changelog-plan.md,
+      # "Rollout").
+      - name: Update CHANGELOG.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            # Core cascade. Nobody types notes on this path — nobody can — so
+            # copy core's verbatim. Core publishes its release before
+            # dispatching, so the body is always readable by now.
+            BODY=$(gh release view "$CORE_TAG" --repo lpdfio/lpdf --json body -q .body | tr -d '\r')
+            HEADER="## $ADAPTER_TAG (core) — $(date -u +%F)"
+          else
+            # Adapter-only patch: the notes typed on this repo's own release.
+            BODY=$(gh release view "$ADAPTER_TAG" --json body        -q .body        | tr -d '\r')
+            DATE=$(gh release view "$ADAPTER_TAG" --json publishedAt -q .publishedAt | cut -c1-10)
+            if [ -z "$DATE" ]; then
+              echo "::error::$ADAPTER_TAG has no published release — was the tag pushed without one?"
+              exit 1
+            fi
+            HEADER="## $ADAPTER_TAG — $DATE"
+          fi
+
+          # Hand the body to the release step below (multi-line safe).
+          {
+            echo 'RELEASE_BODY<<__LPDF_BODY__'
+            printf '%s\n' "$BODY"
+            echo '__LPDF_BODY__'
+          } >> "$GITHUB_ENV"
+
+          # Drop the in-job version bump — it is deliberately never committed,
+          # and it would block the branch switch below.
+          git checkout -- .
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch --depth=1 origin main
+          git checkout -B main FETCH_HEAD
+
+          if ! head -n 1 CHANGELOG.md | grep -qx '# Changelog'; then
+            echo "::error::CHANGELOG.md must start with a '# Changelog' line"
+            exit 1
+          fi
+
+          # Re-runs must not duplicate an entry.
+          if grep -q "^## $ADAPTER_TAG " CHANGELOG.md; then
+            echo "$ADAPTER_TAG is already in CHANGELOG.md — nothing to do"
+            exit 0
+          fi
+
+          # Prepend only. Never reformat or reorder what is already there —
+          # the file is hand-editable by design.
+          {
+            echo "# Changelog"
+            echo
+            echo "$HEADER"
+            if [ -n "$BODY" ]; then printf '%s\n' "$BODY"; fi
+            tail -n +2 CHANGELOG.md
+          } > CHANGELOG.next
+          mv CHANGELOG.next CHANGELOG.md
+
+          git add CHANGELOG.md
+          git diff --cached --quiet || git commit -m "changelog: $ADAPTER_TAG"
+          # As the App: the empty extraheader drops the GITHUB_TOKEN header that
+          # checkout set, so git sends the App token from the URL instead.
+          git -c http.https://github.com/.extraheader= push \
+            "https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" main
+
+      # ── Create GitHub Release (core-triggered only) ──────────────────────────
+      # --notes carries core's text onto this repo's Releases page, which
+      # otherwise shows a bare "Full Changelog" compare link. --generate-notes
+      # remains the fallback for an empty core body.
+      - name: Create GitHub Release
+        if: github.event_name == 'repository_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git tag "$ADAPTER_TAG"
+          git push origin "$ADAPTER_TAG"
+          if [ -n "${RELEASE_BODY:-}" ]; then
+            gh release create "$ADAPTER_TAG" \
+              --title "$ADAPTER_TAG" \
+              --notes "$RELEASE_BODY"
+          else
+            gh release create "$ADAPTER_TAG" \
+              --title "$ADAPTER_TAG" \
+              --generate-notes
+          fi

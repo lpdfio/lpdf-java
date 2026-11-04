@@ -131,7 +131,9 @@
 
     <plugins>
       <!-- The engine's WASM, compiled to JVM bytecode at build time: classes in place of the module, so a render
-           needs no compiler and no ASM at run time. wasm/lpdf.wasm is copied in from a core build or release. -->
+           needs no compiler and no ASM at run time. wasm/lpdf.wasm is copied in from a core build or release. A
+           function too large to compile fails the build (interpreterFallback is FAIL unless set), so none is left to
+           Endive's interpreter. -->
       <plugin>
         <groupId>run.endive</groupId>
         <artifactId>endive-compiler-maven-plugin</artifactId>
