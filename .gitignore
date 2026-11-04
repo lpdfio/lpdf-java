@@ -1,0 +1,8 @@
+target
+
+# The engine's WASM, copied in from a core build or release
+wasm/lpdf.wasm
+
+# The fixtures and snapshots of core, copied in by CI
+test/fixtures
+test/snapshots
