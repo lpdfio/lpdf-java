@@ -74,6 +74,13 @@
       <groupId>run.endive</groupId>
       <artifactId>wasi</artifactId>
     </dependency>
+    <!-- For javac only: WASI's classes carry Endive's annotations, which it doesn't pass on, and javac warns without
+         them. Nothing reads them at run time, so the jar doesn't depend on them. -->
+    <dependency>
+      <groupId>run.endive</groupId>
+      <artifactId>annotations</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
