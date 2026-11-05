@@ -135,6 +135,11 @@ final class WasmRunner {
             // A trap is a crash: a bug, or memory that ran out before the cap stopped the render. Each call has an
             // instance of its own, so the next one starts on a fresh engine.
             throw new EngineException(EngineException.CRASHED, e);
+        } catch (OutOfMemoryError e) {
+            // The engine's memory is on the JVM's heap, in pages Endive allocates as it grows, so a heap with less room
+            // than the cap runs out first. The instance is dropped here, and its memory with it.
+            throw new EngineException("The JVM's heap ran out during the render, before its cap of " + maxMemoryMb
+                    + " MB stopped it: give the JVM more heap (-Xmx) or set a lower maxMemoryMb.", e);
         }
         return stdout.toString(StandardCharsets.UTF_8);
     }

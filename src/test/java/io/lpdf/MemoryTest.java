@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,7 +20,13 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import run.endive.runtime.ByteArrayMemory;
+import run.endive.runtime.Instance;
+import run.endive.runtime.Memory;
 import run.endive.runtime.TrapException;
+import run.endive.wabt.Wat2Wasm;
+import run.endive.wasm.Parser;
+import run.endive.wasm.types.MemoryLimits;
 
 /** Big documents, the memory cap of a render, how deep a document may nest, and an engine that crashes. */
 class MemoryTest {
@@ -148,6 +156,40 @@ class MemoryTest {
                 + "its cap stopped it: please report it with the document at https://github.com/lpdfio/lpdf/issues.",
                 error.getMessage());
         assertInstanceOf(TrapException.class, error.getCause());
+    }
+
+    /**
+     * A stand-in module whose memory can't grow, as when the JVM's heap is full: Endive keeps the engine's memory on the
+     * heap, so a heap with less room than the cap runs out before the cap stops the render.
+     */
+    @Test
+    void a_heap_that_runs_out_before_the_cap_throws_an_engine_exception_saying_so() {
+        var module = Parser.parse(Wat2Wasm.parse(
+                "(module (memory 1) (func (export \"_start\") (drop (memory.grow (i32.const 1)))))"));
+        var options = new EngineOptions().maxMemoryMb(512);
+        var engine = new PdfEngine(options, new WasmRunner(
+                () -> Instance.builder(module).withMemoryFactory(MemoryTest::fullHeap),
+                options.timeout(), options.maxMemoryMb()));
+
+        var error = assertThrows(EngineException.class, () -> engine.render(nestedXml(10)));
+
+        assertEquals("The JVM's heap ran out during the render, before its cap of 512 MB stopped it: give the JVM more "
+                + "heap (-Xmx) or set a lower maxMemoryMb.", error.getMessage());
+        assertInstanceOf(OutOfMemoryError.class, error.getCause());
+    }
+
+    /** Endive's memory on a heap with no room for another page: growing it throws, as Endive's does then. */
+    private static Memory fullHeap(MemoryLimits limits) {
+        var memory = new ByteArrayMemory(limits);
+        return (Memory) Proxy.newProxyInstance(Memory.class.getClassLoader(), new Class<?>[] {Memory.class},
+                (proxy, method, args) -> {
+                    if (method.getName().equals("grow")) throw new OutOfMemoryError("Java heap space");
+                    try {
+                        return method.invoke(memory, args);
+                    } catch (InvocationTargetException e) {
+                        throw e.getCause();
+                    }
+                });
     }
 
     /** <code>bench_max.xml</code> with its sections copied: 188 pages and 1 MB of XML for each copy. */

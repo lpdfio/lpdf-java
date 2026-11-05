@@ -45,7 +45,9 @@ public final class EngineOptions {
     /**
      * The megabytes of memory a render may allocate, its data and the fonts, images and files sent with it included:
      * 1024 when left out, from 1 to 4096. A render that needs more stops with an {@link EngineException} that names
-     * the cap.
+     * the cap. The engine's memory is part of the JVM's heap, so a render that fills the heap before it reaches the cap
+     * stops with an {@link EngineException} too, which says to give the JVM more heap ({@code -Xmx}) or set a lower
+     * cap.
      *
      * @throws IllegalArgumentException when {@code megabytes} is below 1 or above 4096
      */

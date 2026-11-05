@@ -142,7 +142,7 @@ public final class PdfEngine {
      * Renders an XML template to a PDF, on the caller's thread.
      *
      * @throws EngineException when the engine refuses the document, saying what to change, the render runs past the
-     *                         timeout or needs more memory than the cap, or the engine crashes
+     *                         timeout or needs more memory than the cap or the JVM's heap has, or the engine crashes
      */
     public byte[] render(String xml, RenderOptions options) {
         Objects.requireNonNull(xml, "xml");
@@ -163,7 +163,7 @@ public final class PdfEngine {
      * <code>data-*</code> attributes of an XML template, is not used.
      *
      * @throws EngineException when the engine refuses the document, saying what to change, the render runs past the
-     *                         timeout or needs more memory than the cap, or the engine crashes
+     *                         timeout or needs more memory than the cap or the JVM's heap has, or the engine crashes
      */
     public byte[] render(PdfDocument document, RenderOptions options) {
         Objects.requireNonNull(document, "document");
@@ -186,7 +186,8 @@ public final class PdfEngine {
      * @throws IllegalArgumentException when a stamp lacks its image, page, width or height
      * @throws EngineException          when the input is not a PDF, needs a password to open, or doesn't have a page a
      *                                  stamp names; an image is not a PNG or a stamp's options are wrong; or the stamp
-     *                                  runs past the timeout or needs more memory than the cap, or the engine crashes
+     *                                  runs past the timeout or needs more memory than the cap or the JVM's heap has,
+     *                                  or the engine crashes
      */
     public byte[] stamp(byte[] pdf, List<StampAttr> stamps) {
         Objects.requireNonNull(pdf, "pdf");

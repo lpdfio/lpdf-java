@@ -57,7 +57,7 @@ byte[] pdf = engine.render(doc);
 
 An XML template renders the same way, `engine.render(xml)`. The data its `data-*` attributes bind goes in `RenderOptions`: maps, lists and records with `data(…)`, or JSON text as it is with `dataJson(…)`.
 
-`render` runs on the caller's thread, and an engine can be shared by every thread. A render stops with an `EngineException` after 5 seconds; `L.engine(new EngineOptions().timeout(60))` sets another limit in seconds, and `timeout(0)` sets none. It also stops once it needs more than 1024 MB of memory; `maxMemoryMb(2048)` sets another cap, from 1 to 4096 MB.
+`render` runs on the caller's thread, and an engine can be shared by every thread. A render stops with an `EngineException` after 5 seconds; `L.engine(new EngineOptions().timeout(60))` sets another limit in seconds, and `timeout(0)` sets none. It also stops once it needs more than 1024 MB of memory; `maxMemoryMb(2048)` sets another cap, from 1 to 4096 MB. The engine's memory is part of the JVM's heap, so a render that fills the heap before it reaches the cap stops with an `EngineException` too: give the JVM more heap with `-Xmx`, or set a lower cap.
 
 ## Requirements
 

@@ -1,8 +1,8 @@
 package io.lpdf;
 
 /**
- * Thrown when the engine refuses a document or a stamp, saying what to change, a render runs past its timeout or its
- * memory cap, or the engine crashes.
+ * Thrown when the engine refuses a document or a stamp, saying what to change, a render runs past its timeout, its
+ * memory cap or the JVM's heap, or the engine crashes.
  */
 public final class EngineException extends RuntimeException {
     private static final long serialVersionUID = 1L;
