@@ -3,6 +3,7 @@ package io.lpdf;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -13,6 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import run.endive.runtime.Instance;
+import run.endive.runtime.WasmInterruptedException;
 import run.endive.wabt.Wat2Wasm;
 import run.endive.wasm.Parser;
 
@@ -148,6 +150,30 @@ class TimeoutTest {
         assertEquals(Snapshots.snapshot("bench_m"), hash.get());
         assertTrue(rendered.get() < stopped.get(), "the render meanwhile ended after the one that timed out");
         Snapshots.assertMatches("bench_m", Snapshots.render("bench_m", new EngineOptions().timeout(1)));
+    }
+
+    /**
+     * The engine's own compiled classes, which the jar ships, stopped at the deadline: the stand-ins above run on
+     * Endive's interpreter, which notices an interrupt by code of its own. The same engine then renders as usual.
+     */
+    @Test
+    void the_engine_stops_at_its_deadline_and_its_next_render_is_right() {
+        assumeTrue(Snapshots.present(), "the fixtures of core are not here");
+        var engine = L.engine(new EngineOptions().timeout(1)).setLicenseKey("test-key");
+        var xml = Snapshots.benchMaxCopied(16);
+
+        var started = System.nanoTime();
+        var error = assertThrows(EngineException.class, () -> engine.render(xml));
+        var seconds = (System.nanoTime() - started) / 1e9;
+
+        assertEquals("The render timed out after 1 second.", error.getMessage());
+        assertInstanceOf(WasmInterruptedException.class, error.getCause());
+        // The clock also counts the 16 MB request the SDK writes before the deadline starts. Uninterrupted, the render
+        // takes several seconds.
+        assertTrue(seconds >= 1 && seconds < 2, "stopped after " + seconds + " s");
+        assertFalse(Thread.currentThread().isInterrupted(), "the timeout's interrupt is left set on the thread");
+        Snapshots.assertMatches("bench_m",
+                engine.render(Snapshots.fixture("bench_m"), new RenderOptions().skipEncryption(true)));
     }
 
     @Test

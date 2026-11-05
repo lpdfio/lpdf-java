@@ -36,7 +36,7 @@ class MemoryTest {
     @Test
     void bench_max_copied_16_times_renders_its_3008_pages() {
         assumeTrue(Snapshots.present(), "the fixtures of core are not here");
-        var xml = benchMaxCopied(16);
+        var xml = Snapshots.benchMaxCopied(16);
         assertTrue(xml.length() > 16_000_000);
 
         var pdf = L.engine(new EngineOptions().timeout(0)).render(xml);
@@ -190,14 +190,6 @@ class MemoryTest {
                         throw e.getCause();
                     }
                 });
-    }
-
-    /** <code>bench_max.xml</code> with its sections copied: 188 pages and 1 MB of XML for each copy. */
-    private static String benchMaxCopied(int copies) {
-        var xml = Snapshots.fixture("bench_max");
-        var start = xml.indexOf("<section");
-        var end = xml.lastIndexOf("</section>") + "</section>".length();
-        return xml.substring(0, start) + xml.substring(start, end).repeat(copies) + xml.substring(end);
     }
 
     /** A document whose columns nest so that its deepest element is {@code depth} levels deep. */

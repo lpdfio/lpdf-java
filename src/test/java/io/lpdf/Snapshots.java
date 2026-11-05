@@ -38,6 +38,14 @@ final class Snapshots {
         }
     }
 
+    /** <code>bench_max.xml</code> with its sections copied: 188 pages and 1 MB of XML for each copy. */
+    static String benchMaxCopied(int copies) {
+        var xml = fixture("bench_max");
+        var start = xml.indexOf("<section");
+        var end = xml.lastIndexOf("</section>") + "</section>".length();
+        return xml.substring(0, start) + xml.substring(start, end).repeat(copies) + xml.substring(end);
+    }
+
     static String snapshot(String name) {
         try {
             return Files.readString(SNAPSHOTS.resolve(name + ".pdf.sha256")).trim();
