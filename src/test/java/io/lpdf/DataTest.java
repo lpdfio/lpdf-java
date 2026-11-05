@@ -8,9 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /** The data a template binds, given as objects (maps, lists, records) or as JSON text. */
 class DataTest {
@@ -43,6 +48,81 @@ class DataTest {
         assertEquals("The data is not JSON: a value expected at 11 of 12 characters.", error.getMessage());
         for (var text : List.of("", "{} {}", "{ \"a\": 01 }", "{ \"a\": +1 }", "{ 'a': 1 }", "[1, 2,]")) {
             assertThrows(IllegalArgumentException.class, () -> options.dataJson(text), text);
+        }
+    }
+
+    /**
+     * Text the SDK takes is text the engine reads, and text it refuses is text the engine would refuse: the engine is
+     * sent each text as it is, past the SDK's check.
+     */
+    @ParameterizedTest
+    @MethodSource("dataTexts")
+    void json_text_is_refused_where_it_is_set_when_the_engine_would_refuse_it(String json, boolean read) {
+        assertEquals(read, engineReads(json), "the engine");
+        assertEquals(read, sdkTakes(json), "the SDK");
+    }
+
+    static Stream<Arguments> dataTexts() {
+        return Stream.of(
+                Arguments.of("{\"a\":\"\\ud83d\\ude00\"}", true),
+                Arguments.of("{\"a\":\"\uD83D\uDE00\"}", true),
+                Arguments.of("{\"a\":\"\\u00E9\\/\"}", true),
+                Arguments.of("{\"a\":\"\u007f\"}", true),
+                Arguments.of("{\"a\":-0, \"b\":1E+2, \"c\":1e-400, \"d\":1.7976931348623157e308}", true),
+                Arguments.of("{\"a\":123456789012345678901234567890}", true),
+                Arguments.of("{\"a\":1, \"a\":2}", true),
+                Arguments.of(JsonTest.nested(Json.MAX_DATA_DEPTH), true),
+                Arguments.of("{\"a\":\"\t\"}", false),
+                Arguments.of("{\"a\":\"line 1\nline 2\"}", false),
+                Arguments.of("{\"a\":\"\0\"}", false),
+                Arguments.of("{\"a\":\"\\u+041\"}", false),
+                Arguments.of("{\"a\":\"\\u004\"}", false),
+                Arguments.of("{\"a\":\"\\x41\"}", false),
+                Arguments.of("{\"a\":\"\\ud800\"}", false),
+                Arguments.of("{\"a\":\"\\udc00\"}", false),
+                Arguments.of("{\"a\":\"\\ud800\\u0041\"}", false),
+                Arguments.of("{\"a\":1e400}", false),
+                Arguments.of("{\"a\":-1.8e308}", false),
+                Arguments.of("{\"a\":" + "1".repeat(400) + "}", false),
+                Arguments.of("{\"a\":1.}", false),
+                Arguments.of("{\"a\":.5}", false),
+                Arguments.of("\uFEFF{}", false),
+                Arguments.of("{}\u00a0", false),
+                Arguments.of(JsonTest.nested(Json.MAX_DATA_DEPTH + 1), false));
+    }
+
+    @Test
+    void data_nested_as_deep_as_the_engine_reads_renders_given_as_text_and_as_objects() {
+        var fromJson = engine.render(TEMPLATE, new RenderOptions().dataJson(JsonTest.nested(Json.MAX_DATA_DEPTH)));
+        var fromObjects = engine.render(TEMPLATE,
+                new RenderOptions().data(JsonTest.nestedData(Json.MAX_DATA_DEPTH)));
+
+        assertArrayEquals(fromJson, fromObjects);
+    }
+
+    /** Whether the engine reads {@code json} as the data of a render, sent to it as it is. */
+    private static boolean engineReads(String json) {
+        var request = new LinkedHashMap<String, Object>();
+        request.put("method", "render_pdf");
+        request.put("key", "");
+        request.put("input", TEMPLATE);
+        request.put("fonts", Map.of());
+        request.put("data", new Json.Raw(json));
+        try {
+            new WasmRunner(EngineOptions.DEFAULT_TIMEOUT, EngineOptions.DEFAULT_MAX_MEMORY_MB).pdf(request);
+            return true;
+        } catch (EngineException e) {
+            assertTrue(e.getMessage().startsWith("request parse error: "), e.getMessage());
+            return false;
+        }
+    }
+
+    private static boolean sdkTakes(String json) {
+        try {
+            new RenderOptions().dataJson(json);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 

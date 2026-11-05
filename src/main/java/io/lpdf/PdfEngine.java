@@ -141,14 +141,17 @@ public final class PdfEngine {
     /**
      * Renders an XML template to a PDF, on the caller's thread.
      *
-     * @throws EngineException when the engine refuses the document, saying what to change, the render runs past the
-     *                         timeout or needs more memory than the cap or the JVM's heap has, or the engine crashes
+     * @throws EngineException          when the engine refuses the document, saying what to change, the render runs past
+     *                                  the timeout or needs more memory than the cap or the JVM's heap has, or the
+     *                                  engine crashes
+     * @throws IllegalArgumentException when the data can't be written as JSON the engine reads: see
+     *                                  {@link RenderOptions#data(Object)}
      */
     public byte[] render(String xml, RenderOptions options) {
         Objects.requireNonNull(xml, "xml");
         Objects.requireNonNull(options, "options");
         var request = request("render_pdf", xml, Sources.ofXml(xml), options);
-        if (options.data() != null) request.put("data", options.data());
+        if (options.data() != null) request.put("data", new Json.Data(options.data()));
         else if (options.dataJson() != null) request.put("data", new Json.Raw(options.dataJson()));
         return wasm.pdf(request);
     }

@@ -33,9 +33,12 @@ public final class RenderOptions {
 
     /**
      * The data the <code>data-*</code> attributes of an XML template bind to: maps, lists, arrays, records, strings,
-     * numbers, booleans and null, written as JSON. Data that is JSON text already goes in {@link #dataJson(String)};
-     * the one set last is used. Left out, a template renders with the content it holds. A document built with
-     * {@link L} has no data.
+     * numbers, booleans and null, written as JSON when the template renders. Data that is JSON text already goes in
+     * {@link #dataJson(String)}; the one set last is used. Left out, a template renders with the content it holds. A
+     * document built with {@link L} has no data.
+     *
+     * <p>The render throws {@link IllegalArgumentException} for data that nests its maps, lists, arrays and records more
+     * than 126 levels deep, the most the engine reads, or holds itself, and for a number that is NaN or infinite.
      */
     public RenderOptions data(Object data) {
         this.data = data;
@@ -52,10 +55,12 @@ public final class RenderOptions {
      * The data as JSON text, such as a file's or a request body's, which goes to the engine as it is: Java has no
      * JSON reader of its own, and this needs none. In place of {@link #data(Object)}: the one set last is used.
      *
-     * @throws IllegalArgumentException when {@code json} is not JSON, saying where
+     * @throws IllegalArgumentException when {@code json} is not JSON, saying where, or is JSON the engine doesn't read:
+     *                                  nested more than 126 levels deep, or with a number past about 1.8e308, the
+     *                                  largest a 64-bit float holds
      */
     public RenderOptions dataJson(String json) {
-        if (json != null) Json.check(json, "The data");
+        if (json != null) Json.checkData(json);
         this.dataJson = json;
         this.data = null;
         return this;
