@@ -1,0 +1,123 @@
+name: CI
+run-name: "${{ format('CI (build + test): {0}', github.event_name == 'pull_request' && github.event.pull_request.title || github.event.head_commit.message) }}"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Tests on JDK ${{ matrix.java }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # The oldest Java the SDK supports, and the newest long-term release.
+        java: ['17', '25']
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-tags: true
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+
+      # ── Download WASI binary from core release ───────────────────────────────
+      # The newest core release, pre-releases included. `main` is built against the engine it will
+      # ship with, and between a core RC and its final release that engine is the RC: an SDK API change
+      # lands with the core release that carries it (Lpdf-devcycle.md §4.2 in lpdfio/lpdf), so pinning
+      # to the last final release fails the build for the whole window. release.yml and rc.yml stay
+      # pinned to the tag they ship.
+      - name: Download lpdf-wasi.wasm
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p wasm
+          CORE_TAG=$(gh api repos/lpdfio/lpdf/releases \
+            --jq 'map(select(.draft | not))[0].tag_name // empty')
+          if [ -z "$CORE_TAG" ]; then
+            echo "::error::No published release in lpdfio/lpdf to build against."
+            exit 1
+          fi
+          echo "Resolved core tag: $CORE_TAG"
+          DOWNLOADED=""
+          for attempt in 1 2 3; do
+            gh release download "$CORE_TAG" \
+              --repo lpdfio/lpdf \
+              --pattern "lpdf-wasi.wasm" \
+              --dir wasm \
+              --clobber && DOWNLOADED=1 && break
+            echo "Attempt $attempt failed — retrying in 10s..."
+            sleep 10
+          done
+          if [ -z "$DOWNLOADED" ]; then
+            echo "::error::Could not download the engine file from core $CORE_TAG."
+            exit 1
+          fi
+          echo "EFFECTIVE_CORE_TAG=$CORE_TAG" >> "$GITHUB_ENV"
+          mv wasm/lpdf-wasi.wasm wasm/lpdf.wasm   # Endive's plugin compiles wasm/lpdf.wasm
+
+      # The check below is a Node script.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      # ── Check the API against the schema ─────────────────────────────────────
+      # The attribute classes and constants follow from schema/lpdf.xsd, and the scripts that check
+      # them live in core. Fails if a generated file differs from what the schema gives, or a class
+      # has other attributes than the schema's element.
+      # The schema is the one at the core tag the engine was taken from.
+      - name: Check the API against the schema
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse \
+            --branch "$EFFECTIVE_CORE_TAG" \
+            https://github.com/lpdfio/lpdf.git _schema
+          git -C _schema sparse-checkout set schema scripts
+          node _schema/scripts/gen-sdk-api.mjs --check --sdk java=.
+          node _schema/scripts/check-sdk-parity.mjs --sdk java=.
+          rm -rf _schema
+
+      # ── Fetch test fixtures and snapshots from core ──────────────────────────
+      - name: Fetch test fixtures and snapshots from core
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse \
+            --branch "$EFFECTIVE_CORE_TAG" \
+            https://github.com/lpdfio/lpdf.git _core
+          git -C _core sparse-checkout set test/fixtures test/snapshots
+          mkdir -p test/fixtures test/snapshots
+          cp -r _core/test/fixtures/. test/fixtures/
+          cp -r _core/test/snapshots/. test/snapshots/
+          rm -rf _core
+
+      # Endive's plugin compiles the engine to classes as part of the build, and fails on a function
+      # it would have to leave to its interpreter.
+      - name: Build and test
+        run: mvn -B verify
+
+      # The jar runs on Endive alone: no ASM, no Endive compiler, no JSON library.
+      - name: Check the runtime dependencies
+        run: |
+          mvn -B -q dependency:list -DincludeScope=runtime -DoutputFile=deps.txt
+          FOUND=$(sed -n 's/^ *\([^: ]*:[^: ]*\):.*/\1/p' deps.txt | sort | tr '\n' ' ')
+          EXPECTED="run.endive:log run.endive:runtime run.endive:wasi run.endive:wasm "
+          if [ "$FOUND" != "$EXPECTED" ]; then
+            echo "::error::The runtime dependencies are '$FOUND', not '$EXPECTED'."
+            exit 1
+          fi
+
+  # The branch ruleset requires one check named Tests: it passes when every JDK's run did.
+  tests:
+    name: Tests
+    needs: test
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Every JDK's tests passed
+        run: test "${{ needs.test.result }}" = success

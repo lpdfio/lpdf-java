@@ -1,0 +1,106 @@
+// Generated from lpdf.xsd by scripts/gen-sdk-api.mjs.
+// Do not edit: change the schema and run `make gen-sdk-api`.
+package io.lpdf;
+
+/**
+ * An image. It is never stretched. With only a width or a height, the other follows the image's proportions. With both,
+ * they are a maximum: the image takes the largest size that fits in them, and its box becomes that size, which the
+ * parent's align places. To put images of different shapes in slots of one size, wrap each in a frame of that size.
+ * With neither, the image has its natural size.
+ */
+public final class ImgAttr extends Attributes {
+    /** Attributes with none set. */
+    public ImgAttr() {
+        super("img", "name");
+    }
+
+    public ImgAttr name(String name) {
+        set("name", name);
+        return this;
+    }
+
+    /**
+     * What the image shows, which a screen reader reads in a tagged document, one with pdfua or a pdfa of level a;
+     * alt="" marks it as decoration, which a reader skips. A PDF/UA document needs it on every image of the layout; at
+     * PDF/A level a without pdfua, an image without it is decoration. A document that is not tagged ignores it.
+     */
+    public ImgAttr alt(String alt) {
+        set("alt", alt);
+        return this;
+    }
+
+    public ImgAttr height(String height) {
+        set("height", height);
+        return this;
+    }
+
+    /**
+     * Width of the element. A length fixes it. fill, in a row, takes the width its line leaves after the other
+     * children, shared equally if several on the line use fill, and never moves to the next line; in a column it takes
+     * the full width.
+     */
+    public ImgAttr width(String width) {
+        set("width", width);
+        return this;
+    }
+
+    public ImgAttr font(String font) {
+        set("font", font);
+        return this;
+    }
+
+    public ImgAttr fontSize(String fontSize) {
+        set("font-size", fontSize);
+        return this;
+    }
+
+    public ImgAttr gap(String gap) {
+        set("gap", gap);
+        return this;
+    }
+
+    public ImgAttr padding(String padding) {
+        set("padding", padding);
+        return this;
+    }
+
+    public ImgAttr background(String background) {
+        set("background", background);
+        return this;
+    }
+
+    public ImgAttr border(String border) {
+        set("border", border);
+        return this;
+    }
+
+    public ImgAttr radius(String radius) {
+        set("radius", radius);
+        return this;
+    }
+
+    public ImgAttr paginate(String paginate) {
+        set("paginate", paginate);
+        return this;
+    }
+
+    public ImgAttr debug(boolean debug) {
+        set("debug", debug);
+        return this;
+    }
+
+    /**
+     * Puts the element, and everything in it, in an optional content group, which the viewer shows or hides. print:
+     * printed, and not shown on screen. screen: shown on screen, and not printed. The element keeps its room either
+     * way, so nothing moves. An element with a group inside an element with another shows only where both show.
+     * Acrobat, Chrome and Firefox switch the groups; Preview and Safari show everything, on screen and in print. Hidden
+     * content is still in the file, where it can be selected and copied: it is not a way to keep anything secret. A
+     * link in print content is drawn and does nothing, and a form field can't be in print content: use a frame with a
+     * border for a box filled in by hand. With pdfa or pdfua on the output, everything shows. With pdfx, the file is
+     * the print version: screen content stays in it, off, and a reader can turn it on in a layers panel.
+     */
+    public ImgAttr ocg(String ocg) {
+        set("ocg", ocg);
+        return this;
+    }
+}

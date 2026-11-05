@@ -1,0 +1,285 @@
+# Lpdf License
+
+Copyright © 2026 Codesense LLC
+
+License inquiries: license@lpdf.io
+
+---
+
+## Choosing Your License
+
+Lpdf is available under three license tiers: a free Community License for individuals and qualifying organizations, a Professional License for mid-size commercial use, and an Enterprise License for larger organizations. Which tier applies matters only in production: use in non-production environments is covered by the Community License for every organization, whatever its revenue. All license tiers receive the complete feature set — no capabilities are gated behind paid plans.
+
+### Definitions
+
+"Production environment" means any environment in which the Software processes real user data or supports live business operations, including staging environments accessible by end users.
+
+"Production System" means a distinct, independently operated system, application, or automated workflow that uses the Software in a production environment, where "independently operated" means it serves a separate and identifiable purpose, user base, or business function. For the avoidance of doubt: multiple delivery channels (web, mobile, desktop, API) of the same system serving the same purpose and user base constitute a single Production System; all internal business operations of an organization where the organization's own personnel are the sole end users constitute a single Production System regardless of the number of internal systems or services involved; a service or component that operates exclusively as part of a larger system and has no independent production deployment is not a separate Production System; and a shared internal service or gateway that provides functionality to multiple otherwise-independent Production Systems does not itself constitute a single Production System encompassing them — each Production System it serves is counted and licensed individually.
+
+### Equal Features Across All Tiers
+
+Every user of Lpdf, regardless of license tier, has access to the same library, the same layout engine, the same adapters, and the same output quality. Licensing determines the terms of use, not the features available.
+
+### Transitive Dependency
+
+If Lpdf is pulled in as an indirect dependency of another library or framework rather than used directly in your project, the Community License terms apply automatically with respect to revenue thresholds — no upgrade to a Professional or Enterprise License is required solely on account of the indirect dependency. 
+
+The author of the wrapping library or framework is responsible for obtaining a valid license key; end users of that library or framework are not required to obtain a separate Lpdf license key for their indirect use. 
+
+This exemption does not apply if the dependency was introduced, created, or controlled by the licensee's organization for the purpose of circumventing license requirements.
+
+### Non-Production Use
+
+Use of the Software in non-production environments is covered by the Community License for any organization, whatever its annual gross revenue, with no time limit. The revenue thresholds below determine which license is required for use in a production environment.
+
+### Individuals and Open-Source Projects
+
+Personal use and open-source projects whose source code is publicly available under an OSI-approved license qualify for the Community License at no cost.
+
+### Non-Profit Organizations
+
+Legally recognized non-profit organizations (including 501(c)(3) entities in the United States and equivalent status in other jurisdictions) qualify for the Community License regardless of operating budget.
+
+### Small Businesses
+
+Companies and organizations whose total annual gross revenue did not exceed **1,000,000 USD** in the most recent 12-month fiscal year qualify for the Community License at no cost, including for commercial products and services.
+
+Organizations whose revenue crosses the 1,000,000 USD threshold have a **90-day grace period** following the close of their fiscal year to obtain a Professional or Enterprise license. During this grace period, continued use is permitted.
+
+### Mid-Size Businesses
+
+Companies and organizations whose total annual gross revenue exceeded **1,000,000 USD** but did not exceed **10,000,000 USD** in the most recent 12-month fiscal year must obtain a Professional License for each Production System in which they use the Software.
+
+### Larger Businesses
+
+Companies and organizations whose total annual gross revenue exceeded **10,000,000 USD** in the most recent 12-month fiscal year must obtain an Enterprise License for each Production System in which they use the Software.
+
+Organizations whose revenue crosses the 10,000,000 USD threshold have a **90-day grace period** following the close of their fiscal year to obtain an Enterprise license. During this grace period, continued use under a Professional License is permitted. The licensee remains subject to the terms of their existing Professional License and does not gain Enterprise rights until an Enterprise License is obtained.
+
+### Supporting Lpdf
+
+Paid licenses directly fund the continued development, maintenance, and improvement of Lpdf. If your organization has grown beyond the Community threshold, purchasing a license is the most direct way to ensure Lpdf continues to exist and improve.
+
+---
+
+## Unlicensed Use
+
+Use of the Software without a valid license key, including with an expired key or after the license under which a key was issued has ended ("Unlicensed Use"), is permitted in non-production environments by anyone, with no time limit, and in production environments by those who qualify for the Community License.
+
+Unlicensed Use is not a substitute for a Professional or Enterprise License. An organization that requires one for a Production System may not use the Software in that Production System without it, whether or not the attribution notice appears.
+
+Unlicensed Use is subject to the following restriction:
+
+**Attribution.** Each document rendered shall include the Lpdf attribution in the top-right corner. This notice may not be suppressed, removed, or obscured.
+
+This restriction is lifted upon obtaining a valid license key. Community keys are available at no cost at lpdf.io.
+
+---
+
+## Terms for Every License
+
+These terms apply to all use of the Software: under the Community, Professional and Enterprise Licenses, and as Unlicensed Use. Where a permission elsewhere in this document is broader, these terms limit it.
+
+### Trademarks
+
+"Lpdf" and the Lpdf logo are trademarks of Codesense LLC and are not licensed under any part of this document. You may use the name only to state accurately that a product uses or works with Lpdf. A modified version of the Software may not be distributed under the name Lpdf, under a confusingly similar name, or with the Lpdf logo. This does not affect the attribution notice the Software places in rendered documents.
+
+### License Key Verification
+
+You may not remove, disable, bypass, or otherwise circumvent the license key verification in the Software or the attribution notice it produces, and you may not distribute a version of the Software in which either has been removed, disabled, bypassed, or circumvented. A modified version of the Software requires the same license as the original. Use of a version in which the license key verification or the attribution notice has been circumvented is not licensed under any tier.
+
+### Copies From Others
+
+A copy of the Software obtained from anyone other than Codesense LLC, modified or not, and whether provided free of charge or for a fee, conveys no rights beyond those of the Community License, and does not replace a Professional or Enterprise License where one is required. Copies that Codesense LLC publishes itself, including its packages on public package registries, are obtained from Codesense LLC. Professional and Enterprise rights are granted only by Codesense LLC, through a license purchased from it. No one who distributes a copy of the Software may represent that it carries any other rights. This does not limit the right of a Professional or Enterprise licensee to distribute the Software as a component of its licensed Production System.
+
+### Feedback
+
+Codesense LLC welcomes bug reports, suggestions, and other feedback about Lpdf, through its issue tracker, discussions, email, or any other channel. By giving feedback, you grant Codesense LLC a perpetual, irrevocable, worldwide, royalty-free right to use it for any purpose, including in any version of Lpdf under any license, without any obligation to you, including credit or compensation. Codesense LLC alone decides whether and how feedback is acted on. Codesense LLC does not accept code contributions except under a separate written agreement, and giving feedback does not make you a contributor to Lpdf or give you any rights in it.
+
+---
+
+## Lpdf Community License
+
+*Applies to: individuals, open-source projects, non-profit organizations, and companies with annual gross revenue under 1,000,000 USD; and to any organization, whatever its revenue, for use in non-production environments.*
+
+Permission is hereby granted, free of charge, to any person or qualifying organization obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. Any redistribution of the Software must be made under the terms of this Community License and may not be sublicensed under different terms. This permission is subject to the Terms for Every License above.
+
+### License Key
+
+A license key issued under this license may be used by you, your employees, and contractors working on your behalf on your projects. You may not share, distribute, or otherwise make your license key available to individuals or organizations outside your own. Any person or organization outside your own that wishes to use Lpdf must obtain their own license key at lpdf.io.
+
+All modifications to the Software made by the licensee remain the intellectual property of the licensee. Codesense LLC claims no ownership over modifications.
+
+If your organization's annual gross revenue exceeds 1,000,000 USD, your rights under this Community License to use the Software in commercial Production Systems are automatically terminated upon expiration of the 90-day grace period described above, and you must obtain a Professional or Enterprise license for each such Production System. Use under this Community License by individuals, open-source projects, and non-profit organizations is not subject to revenue thresholds and is unaffected by this provision. Your rights under this Community License for use in non-production environments are also unaffected.
+
+### License Key Expiration
+
+This Community License runs for a term of one year, and license keys issued under it are valid until 7 days after the end of the term in which they are issued. The term may be renewed from the portal at no cost provided the licensee continues to qualify under this Community License; use in non-production environments always qualifies. After each renewal, new keys are generated from the portal and deployed in place of the previous ones. Use of an expired key is treated as Unlicensed Use — documents rendered without a valid key will include an attribution notice as described above.
+
+### Governing Law
+
+This license is governed by and construed in accordance with the laws of the State of Texas, United States, without regard to its conflict of law provisions.
+
+### Disclaimer of Warranty
+
+THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL CODESENSE LLC OR ITS CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. IN NO EVENT SHALL CODESENSE LLC'S TOTAL CUMULATIVE LIABILITY TO ANY PARTY EXCEED THE GREATER OF (A) THE FEES PAID BY THAT PARTY TO CODESENSE LLC IN THE TWELVE MONTHS PRECEDING THE CLAIM, OR (B) ONE HUNDRED US DOLLARS (USD 100).
+
+---
+
+## Lpdf Professional License
+
+*Minimum required for companies and organizations with annual gross revenue exceeding 1,000,000 USD and not exceeding 10,000,000 USD.*
+
+### Conduct
+
+Licensees agree not to make false statements of fact about Lpdf, Codesense LLC, or its contributors that are intended to cause material harm to the reputation of the project or the company. This clause does not restrict good-faith criticism, bug reports, public discussion of software deficiencies, or reviews based on the licensee's genuine experience.
+
+License rights may not be rented, leased, or transferred to any third party. A license key issued under this license may be used by the licensee's employees and contractors working on the licensee's behalf; the licensee may not share or distribute a license key to individuals or organizations outside their own, who must obtain their own license key.
+
+### License Grant
+
+Subject to payment of the applicable license fee per Production System, Codesense LLC grants the licensee a non-exclusive, worldwide, royalty-free license to use the Software within a single licensed Production System:
+
+- Use, copy, modify, and integrate the Software into the licensed Production System
+- Deploy the Software across any number of servers, environments, and infrastructure serving that Production System
+- Distribute the Software as a component of the licensed Production System
+
+A separate license is required for each additional Production System in which the licensee uses the Software in a production environment.
+
+**Tier compliance.** Licensee is responsible for ensuring their use of the Software complies with the applicable license tier at all times. If the licensee's annual gross revenue crosses 10,000,000 USD, the licensee must obtain an Enterprise License for each affected Production System within 90 days of the close of the fiscal year in which the threshold was crossed. Use of a Professional License key while qualifying for the Enterprise tier is a material breach of this Agreement.
+
+### License Fees and Subscription
+
+A license fee is required per Production System for use of the Software in a production environment (as defined above). Use in non-production environments needs no paid license, at any revenue and for any length of time: it is covered by the Community License, or is Unlicensed Use if no valid license key is installed.
+
+Upon payment, the licensee receives a license for the term of the subscription, covering every version of Lpdf, and every update, new feature, and security patch, released while the subscription is active. The license does not continue after the subscription ends, and it grants no perpetual right to any version.
+
+License keys issued under this license are valid until 30 days after the end of the subscription term in which they are issued. The subscription renews automatically upon annual payment; after each renewal, new keys are generated from the portal and deployed in place of the previous ones. An expired key reverts to Unlicensed Use behavior — documents rendered without a valid key will include an attribution notice. A valid key is required to exercise the license grant in any production environment.
+
+**Active subscription required.** The license grant is contingent on an active subscription in good standing. A subscription renewed within 30 days after its term ends is treated as never having lapsed, including for use during those 30 days. Otherwise, once the subscription has expired or been cancelled, further use of the Software is Unlicensed Use, which does not permit use in a Production System that requires this license. Keys issued under the license may no longer be used, including keys that remain technically valid, and using one is a material breach of this Agreement. If a payment for the license is refunded in full or reversed through a chargeback, the license is treated as though that payment had never been made, and no key issued under the license since that payment authorizes use of the Software in any environment, production or non-production. If a chargeback is later reversed, this no longer applies. None of this prevents the licensee from obtaining a Community License where they qualify for one.
+
+### Support
+
+Professional License holders receive email support from Codesense LLC with a target response time of 3 business days for standard inquiries. Support terms are further detailed at lpdf.io/support.
+
+### Audit
+
+Codesense LLC may, upon 30 days' written notice and no more than once per calendar year, request a written certification from the licensee confirming their applicable license tier and annual gross revenue for the most recent fiscal year. The licensee agrees to provide such certification within 15 business days of the request.
+
+### Ownership and Modifications
+
+Codesense LLC retains all ownership, copyright, and intellectual property rights in the Software at all times. This license grants rights to use the Software; it does not transfer ownership of any kind.
+
+All modifications to the Software made by the licensee remain the intellectual property of the licensee. Codesense LLC claims no ownership over licensee modifications.
+
+### Copyright
+
+All copies, modifications, and distributions of the Software must retain the original copyright notice. Licensees may not remove, alter, or obscure any copyright, trademark, or attribution notices included in the Software.
+
+### Data and Privacy
+
+Codesense LLC does not collect, process, or retain any data that the licensee processes through the Software. All data processed by Lpdf remains solely within the licensee's infrastructure.
+
+### Export Compliance
+
+The Software may be subject to export control laws and regulations, including the U.S. Export Administration Regulations (EAR) and sanctions programs administered by OFAC. The licensee is solely responsible for complying with all applicable export control and sanctions laws in connection with the licensee's use of the Software.
+
+### Disclaimer of Warranty
+
+THIS SOFTWARE IS PROVIDED "AS IS," WITHOUT A WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL CODESENSE LLC OR ITS CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. IN NO EVENT SHALL CODESENSE LLC'S TOTAL CUMULATIVE LIABILITY TO ANY PARTY EXCEED THE GREATER OF (A) THE FEES PAID BY THAT PARTY TO CODESENSE LLC IN THE TWELVE MONTHS PRECEDING THE CLAIM, OR (B) ONE HUNDRED US DOLLARS (USD 100).
+
+### Governing Law and Dispute Resolution
+
+This license is governed by and construed in accordance with the laws of the State of Texas, United States, without regard to its conflict of law provisions.
+
+Any dispute arising out of or relating to this license or the Software shall be resolved by binding arbitration administered by the American Arbitration Association under its Commercial Arbitration Rules. The arbitration shall take place in Plano, Texas. Judgment on the award rendered by the arbitrator may be entered in any court of competent jurisdiction.
+
+Notwithstanding the foregoing, either party may seek injunctive or other equitable relief in any court of competent jurisdiction to prevent the actual or threatened infringement, misappropriation, or violation of a party's intellectual property rights.
+
+---
+
+## Lpdf Enterprise License
+
+*Required for companies and organizations with annual gross revenue exceeding 10,000,000 USD. Available to any organization that prefers Enterprise license terms.*
+
+### Conduct
+
+Licensees agree not to make false statements of fact about Lpdf, Codesense LLC, or its contributors that are intended to cause material harm to the reputation of the project or the company. This clause does not restrict good-faith criticism, bug reports, public discussion of software deficiencies, or reviews based on the licensee's genuine experience.
+
+License rights may not be rented, leased, or transferred to any third party. A license key issued under this license may be used by the licensee's employees, contractors, and personnel of Controlled Entities (as defined in the License Grant below) working on Production Systems licensed by the licensee. The licensee may not share or distribute a license key for use in Production Systems not licensed by the licensee; any Production System operated independently by a Controlled Entity requires its own license obtained by that entity.
+
+### License Grant
+
+Subject to payment of the applicable license fee per Production System, Codesense LLC grants the licensee a non-exclusive, worldwide, royalty-free license for an unlimited number of developers within the licensee's organization to use the Software within a single licensed Production System:
+
+- Use, copy, modify, and integrate the Software into the licensed Production System
+- Deploy the Software across any number of servers, environments, and infrastructure serving that Production System
+- Distribute the Software as a component of the licensed Production System
+
+A separate license is required for each additional Production System in which the licensee uses the Software in a production environment.
+
+**Controlled Entities.** "Controlled Entities" means wholly owned subsidiaries and entities in which the licensee holds more than 50% ownership or voting control. Personnel of Controlled Entities may use license keys issued under this license solely for Production Systems licensed by the licensee. This does not extend the license to Production Systems operated independently by a Controlled Entity; each such Production System requires its own license obtained by the Controlled Entity at the tier applicable to that entity's annual gross revenue.
+
+**Tier compliance.** Licensee is responsible for ensuring their use of the Software complies with the applicable license tier at all times. Each Controlled Entity using the Software must qualify for the tier under which they operate. If a Controlled Entity's annual gross revenue would independently qualify that entity for a different tier, that entity must obtain its own license at the applicable tier for any Production System it independently operates.
+
+### License Fees and Subscription
+
+A license fee is required per Production System for use of the Software in a production environment (as defined above). Use in non-production environments needs no paid license, at any revenue and for any length of time: it is covered by the Community License, or is Unlicensed Use if no valid license key is installed.
+
+Upon payment, the licensee receives a license for the term of the subscription, covering every version of Lpdf, and every update, new feature, and security patch, released while the subscription is active. The license does not continue after the subscription ends, and it grants no perpetual right to any version, whatever keys remain technically valid.
+
+**License keys.** License keys issued under this license are locked to the major version of Lpdf current at the time of generation and carry no date expiry. While the subscription is active and in good standing, the licensee may generate new keys for the current major version from the portal at any time. When a new major version of Lpdf is released, a new key must be generated from the portal to use that version; keys generated for a prior major version continue to function with that version only. The right to generate new keys requires an active subscription; key generation rights terminate upon subscription lapse.
+
+**Active subscription required.** The license grant is contingent on an active subscription in good standing. A subscription renewed within 60 days after its term ends is treated as never having lapsed, including for use during those 60 days. Otherwise, once the subscription has expired or been cancelled, further use of the Software is Unlicensed Use, which does not permit use in a Production System that requires this license. Keys issued under the license may no longer be used, including keys that carry no date expiry and remain technically valid, and using one is a material breach of this Agreement. If a payment for the license is refunded in full or reversed through a chargeback, the license is treated as though that payment had never been made, and no key issued under the license since that payment — including keys that carry no date expiry — authorizes use of the Software in any environment, production or non-production. If a chargeback is later reversed, this no longer applies. None of this prevents the licensee from obtaining a Community License where they qualify for one.
+
+### Support
+
+Enterprise License holders receive priority support from Codesense LLC. Supported response times and escalation procedures are defined at lpdf.io/support. Custom SLA terms may be negotiated as part of a Master Service Agreement.
+
+### Contract
+
+Enterprise licensees may request a Master Service Agreement (MSA) in place of the standard terms of this license. To initiate an MSA request, contact license@lpdf.io. The standard terms govern until a fully executed MSA is in place. Invoice billing is available upon request.
+
+### Audit
+
+Codesense LLC may, upon 30 days' written notice and no more than once per calendar year, request a written certification from the licensee confirming their applicable license tier and annual gross revenue for the most recent fiscal year, and may request a list of Controlled Entities whose personnel have been granted access to the licensee's license keys. The licensee agrees to provide such certification within 15 business days of the request. For Enterprise licensees under an MSA, audit rights may be further defined therein.
+
+### Ownership and Modifications
+
+Codesense LLC retains all ownership, copyright, and intellectual property rights in the Software at all times. This license grants rights to use the Software; it does not transfer ownership of any kind.
+
+All modifications to the Software made by the licensee remain the intellectual property of the licensee. Codesense LLC claims no ownership over licensee modifications.
+
+### Copyright
+
+All copies, modifications, and distributions of the Software must retain the original copyright notice. Licensees may not remove, alter, or obscure any copyright, trademark, or attribution notices included in the Software.
+
+### Data and Privacy
+
+Codesense LLC does not collect, process, or retain any data that the licensee processes through the Software. All data processed by Lpdf remains solely within the licensee's infrastructure.
+
+### Export Compliance
+
+The Software may be subject to export control laws and regulations, including the U.S. Export Administration Regulations (EAR) and sanctions programs administered by OFAC. The licensee is solely responsible for complying with all applicable export control and sanctions laws in connection with the licensee's use of the Software.
+
+### Disclaimer of Warranty
+
+THIS SOFTWARE IS PROVIDED "AS IS," WITHOUT A WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL CODESENSE LLC OR ITS CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. IN NO EVENT SHALL CODESENSE LLC'S TOTAL CUMULATIVE LIABILITY TO ANY PARTY EXCEED THE GREATER OF (A) THE FEES PAID BY THAT PARTY TO CODESENSE LLC IN THE TWELVE MONTHS PRECEDING THE CLAIM, OR (B) ONE HUNDRED US DOLLARS (USD 100).
+
+### Governing Law and Dispute Resolution
+
+This license is governed by and construed in accordance with the laws of the State of Texas, United States, without regard to its conflict of law provisions.
+
+Any dispute arising out of or relating to this license or the Software shall be resolved by binding arbitration administered by the American Arbitration Association under its Commercial Arbitration Rules. The arbitration shall take place in Plano, Texas. Judgment on the award rendered by the arbitrator may be entered in any court of competent jurisdiction.
+
+Notwithstanding the foregoing, either party may seek injunctive or other equitable relief in any court of competent jurisdiction to prevent the actual or threatened infringement, misappropriation, or violation of a party's intellectual property rights.
+
+---
+
+Licenses are purchased, renewed and managed, and license keys issued, through the Codesense portal at my.codesense.dev, under its Terms of Service and Refund Policy.
+
+For license purchases and inquiries: license@lpdf.io
+
+Support: lpdf.io/support

@@ -1,0 +1,94 @@
+// Generated from lpdf.xsd by scripts/gen-sdk-api.mjs.
+// Do not edit: change the schema and run `make gen-sdk-api`.
+package io.lpdf;
+
+/**
+ * A barcode at a fixed place on the page. It needs width or height, and the other follows the barcode's proportions.
+ * With both, they are a maximum: the barcode takes the largest size that fits in them, and its box becomes that size,
+ * so an anchor places the barcode itself. x and y place its box: the top-left corner, or with anchor, an offset from
+ * that point of the page, where the box's matching point goes.
+ */
+public final class BarcodeAtAttr extends Attributes {
+    /** Attributes with none set. */
+    public BarcodeAtAttr() {
+        super("barcode-at", "type", "data");
+    }
+
+    public BarcodeAtAttr type(String type) {
+        set("type", type);
+        return this;
+    }
+
+    public BarcodeAtAttr data(String data) {
+        set("data", data);
+        return this;
+    }
+
+    /**
+     * Height of the whole barcode, with the digits of hrt inside it: they take the bottom 12pt and the bars the rest. A
+     * barcode is never stretched. With only a height, the width follows the barcode's proportions. With both width and
+     * height, they are a maximum: the barcode takes the largest size that fits in them, and its box becomes that size.
+     * A QR code is square, so it takes the smaller of the two. Without a size, a code128 is as wide as its bars at 1pt
+     * per module and its bars are 40pt high, and an ean13 is the standard symbol, 0.33mm per module and bars 22.85mm
+     * high. The digits of hrt add 12pt to either.
+     */
+    public BarcodeAtAttr height(String height) {
+        set("height", height);
+        return this;
+    }
+
+    public BarcodeAtAttr ec(String ec) {
+        set("ec", ec);
+        return this;
+    }
+
+    public BarcodeAtAttr hrt(boolean hrt) {
+        set("hrt", hrt);
+        return this;
+    }
+
+    public BarcodeAtAttr color(String color) {
+        set("color", color);
+        return this;
+    }
+
+    public BarcodeAtAttr background(String background) {
+        set("background", background);
+        return this;
+    }
+
+    public BarcodeAtAttr x(String x) {
+        set("x", x);
+        return this;
+    }
+
+    public BarcodeAtAttr y(String y) {
+        set("y", y);
+        return this;
+    }
+
+    public BarcodeAtAttr anchor(String anchor) {
+        set("anchor", anchor);
+        return this;
+    }
+
+    public BarcodeAtAttr width(String width) {
+        set("width", width);
+        return this;
+    }
+
+    /**
+     * Puts the element, and everything in it, in an optional content group, which the viewer shows or hides. print:
+     * printed, and not shown on screen. screen: shown on screen, and not printed. The element keeps its room either
+     * way, so nothing moves. An element with a group inside an element with another shows only where both show.
+     * Acrobat, Chrome and Firefox switch the groups; Preview and Safari show everything, on screen and in print. Hidden
+     * content is still in the file, where it can be selected and copied: it is not a way to keep anything secret. A
+     * link in print content is drawn and does nothing, and a form field can't be in print content: use a frame with a
+     * border for a box filled in by hand. With pdfa or pdfua on the output, everything shows. With pdfx, the file is
+     * the print version: screen content stays in it, off, and a reader can turn it on in a layers panel.
+     */
+    public BarcodeAtAttr ocg(String ocg) {
+        set("ocg", ocg);
+        return this;
+    }
+}
