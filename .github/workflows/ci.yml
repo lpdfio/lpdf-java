@@ -112,6 +112,20 @@ jobs:
             exit 1
           fi
 
+      # ── The release jars ─────────────────────────────────────────────────────
+      # The release profile, which release.yml first builds when it publishes, after core's release is
+      # out: the sources jar, and the Javadoc jar with doclint, which fails the build on a Javadoc error.
+      # On JDK 17 only, the one release.yml builds on. Signing is left to the release, whose key is a
+      # secret of its environments.
+      - name: Build the release jars
+        if: matrix.java == '17'
+        run: mvn -B -P release verify -Dgpg.skip -DskipTests
+
+      # The sources jar holds no compiled classes, and the main jar holds the compiled engine.
+      - name: Check the release jars
+        if: matrix.java == '17'
+        run: sh scripts/check-release-jars.sh
+
   # The branch ruleset requires one check named Tests: it passes when every JDK's run did.
   tests:
     name: Tests

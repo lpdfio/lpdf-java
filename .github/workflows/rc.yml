@@ -111,6 +111,17 @@ jobs:
           path: target/lpdf-*.jar
           retention-days: 14
 
+      # ── The release jars ─────────────────────────────────────────────────────
+      # The release profile on the RC's engine, as release.yml builds it, without signing: the sources
+      # jar, and the Javadoc jar with doclint. After the upload, so that the artifact keeps the one jar:
+      # target/lpdf-*.jar would take these two too.
+      - name: Build the release jars
+        run: mvn -B -P release verify -Dgpg.skip -DskipTests
+
+      # The sources jar holds no compiled classes, and the main jar holds the compiled engine.
+      - name: Check the release jars
+        run: sh scripts/check-release-jars.sh
+
       # ── What ships from this repo ────────────────────────────────────────────
       # The final core release publishes this repo's main as it stands. Anything
       # on main since the last release tag ships in FINAL_TAG with only core's
