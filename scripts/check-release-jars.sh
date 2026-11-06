@@ -30,7 +30,10 @@ require_one_jar Javadoc "$javadoc_jar"
 
 failed=0
 
-stray=$(jar tf "$sources_jar" | grep -v -E '\.java$|/$|^META-INF/MANIFEST\.MF$|^META-INF/maven/' || true)
+# Listed apart from the filter: in a pipeline the status would be grep's, and a jar that can't be
+# read would pass as one with no stray entries.
+sources_entries=$(jar tf "$sources_jar") || { echo "::error::Can't read $sources_jar as a jar."; exit 1; }
+stray=$(printf '%s\n' "$sources_entries" | grep -v -E '\.java$|/$|^META-INF/MANIFEST\.MF$|^META-INF/maven/' || true)
 if [ -n "$stray" ]; then
     echo "::error::$sources_jar holds $(printf '%s\n' "$stray" | wc -l | tr -d ' ') entries that are not Java sources, folders, its manifest or under META-INF/maven/:"
     printf '%s\n' "$stray"
@@ -44,7 +47,7 @@ if ! printf '%s\n' "$engine_files" | grep -q '\.class$'; then
     echo "::error::$engine_dir holds no compiled classes: the build compiled no engine."
     failed=1
 else
-    main_entries=$(jar tf "$main_jar")
+    main_entries=$(jar tf "$main_jar") || { echo "::error::Can't read $main_jar as a jar."; exit 1; }
     missing=$(printf '%s\n' "$engine_files" | while read -r file; do
         printf '%s\n' "$main_entries" | grep -q -x -F "$file" || echo "$file"
     done)
