@@ -194,6 +194,11 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
             <version>3.4.0</version>
+            <configuration>
+              <!-- The engine's compiled classes reach the build as a resource folder, which the sources jar would
+                   pack too. The main jar has them; the project has no resources of its own. -->
+              <excludeResources>true</excludeResources>
+            </configuration>
             <executions>
               <execution>
                 <id>attach-sources</id>
