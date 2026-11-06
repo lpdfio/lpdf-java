@@ -184,8 +184,9 @@
   </build>
 
   <profiles>
-    <!-- What Maven Central asks of a release: the sources, the Javadoc and a GPG signature of each file. Only
-         release.yml turns it on, with the Central Portal token and the signing key from its environment. -->
+    <!-- What Maven Central asks of a release: the sources, the Javadoc and a GPG signature of each file. release.yml
+         turns it on to publish, with the Central Portal token and the signing key from its environment. ci.yml and
+         rc.yml build it without signing (-Dgpg.skip), to check its jars before a release does. -->
     <profile>
       <id>release</id>
       <build>
