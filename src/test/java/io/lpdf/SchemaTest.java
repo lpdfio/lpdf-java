@@ -699,6 +699,10 @@ class SchemaTest {
         assertEquals("h1", rule.type());
         assertEquals(Map.of("font-size", "xl", "color", "muted"), rule.attrs());
         assertEquals("quote", LMarkdown.quote(new MarkdownQuoteAttr().barColor("primary")).type());
+        var thematicBreak = LMarkdown.hr(new MarkdownHrAttr().color("muted").thickness("xs"));
+        assertEquals("hr", thematicBreak.type());
+        assertEquals(Map.of("color", "muted", "thickness", "xs"), thematicBreak.attrs());
+        assertEquals(Map.of(), LMarkdown.hr(NoAttr).attrs());
         assertEquals(Map.of(), LMarkdown.em(NoAttr).attrs());
         assertEquals(List.of("# a"), LMarkdown.content(NoAttr, List.of("# a")).nodes());
     }
