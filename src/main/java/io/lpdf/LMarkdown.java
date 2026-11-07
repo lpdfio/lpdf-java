@@ -139,6 +139,16 @@ public final class LMarkdown {
         return li((MarkdownLiAttr) null);
     }
 
+    /** Builds the rule of a thematic break, written --- in Markdown. */
+    public static MarkdownRule hr(MarkdownHrAttr attrs) {
+        return new MarkdownRule("hr", Attributes.of(attrs));
+    }
+
+    /** Builds the rule of a thematic break, written --- in Markdown, with no attributes. */
+    public static MarkdownRule hr(NoAttributes attrs) {
+        return hr((MarkdownHrAttr) null);
+    }
+
     /** Builds the rule of a link. */
     public static MarkdownRule a(MarkdownAAttr attrs) {
         return new MarkdownRule("a", Attributes.of(attrs));
