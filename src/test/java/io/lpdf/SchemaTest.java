@@ -301,7 +301,7 @@ class SchemaTest {
         assertEquals(render(build.apply("50pt")), render(build("m", row)));
         var error = assertThrows(EngineException.class, () -> render(build.apply("medum")));
         assertTrue(error.getMessage().contains(
-                "invalid height value: 'medum' — expected full, fill, a slot from xs to xxl or a pt value"), error.getMessage());
+                "invalid height value: 'medum' — expected full, fill, a slot from xs to xxl or a length in pt, mm or in"), error.getMessage());
     }
 
     private static PdfDocument build(String height, Map<String, String> row) {
