@@ -11,7 +11,7 @@
   <packaging>jar</packaging>
 
   <name>Lpdf</name>
-  <description>Lpdf for Java: PDFs from XML templates or a document built in code, by a layout engine in WebAssembly.</description>
+  <description>Java SDK for Lpdf — PDF as Code on every platform. You describe a document as code or XML. Lpdf renders a compact, pixel-perfect PDF — identical across platforms.</description>
   <url>https://lpdf.io</url>
 
   <licenses>
