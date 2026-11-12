@@ -11,7 +11,7 @@
   <packaging>jar</packaging>
 
   <name>Lpdf</name>
-  <description>Java SDK for Lpdf — PDF as Code on every platform. You describe a document as code or XML. Lpdf renders a compact, pixel-perfect PDF — identical across platforms.</description>
+  <description>Java SDK for Lpdf, the PDF engine that renders a document written in XML or built in code to the same PDF in every language.</description>
   <url>https://lpdf.io</url>
 
   <licenses>
