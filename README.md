@@ -2,9 +2,7 @@
 
 # io.lpdf:lpdf
 
-**Java SDK for [Lpdf](https://lpdf.io?utm_campaign=sdk-java&utm_medium=referral&utm_source=readme) — PDF as Code on every platform**
-
-You describe a document as code or XML. Lpdf renders a compact, pixel-perfect PDF — identical across platforms.
+`io.lpdf:lpdf` is the Java SDK for [Lpdf](https://lpdf.io?utm_campaign=sdk-java&utm_medium=referral&utm_source=readme), the PDF engine that renders a document written in XML or built in code to the same PDF in every language.
 
 ## Installation
 
@@ -55,23 +53,19 @@ var doc = L.document(new DocumentAttr().size("letter"), List.of(
 byte[] pdf = engine.render(doc);
 ```
 
-An XML template renders the same way, `engine.render(xml)`. The data its `data-*` attributes bind goes in `RenderOptions`: maps, lists and records with `data(…)`, or JSON text as it is with `dataJson(…)`.
-
-`render` runs on the caller's thread, and an engine can be shared by every thread. A render stops with an `EngineException` after 5 seconds; `L.engine(new EngineOptions().timeout(60))` sets another limit in seconds, and `timeout(0)` sets none. It also stops once it needs more than 1024 MB of memory; `maxMemoryMb(2048)` sets another cap, from 1 to 4096 MB. The engine's memory is part of the JVM's heap, so a render that fills the heap before it reaches the cap stops with an `EngineException` too: give the JVM more heap with `-Xmx`, or set a lower cap.
-
 ## Requirements
 
-- Java 17+
-- No native code and nothing to install: the engine is compiled to JVM classes inside the jar, and runs on [Endive](https://github.com/bytecodealliance/endive), a WebAssembly runtime written in Java, its one dependency.
+- Java 17 or later
+- No native code: the engine is compiled to JVM classes inside the jar, and runs on [Endive](https://github.com/bytecodealliance/endive), a WebAssembly runtime written in Java, which Maven or Gradle installs with the SDK
 
 ## Docs
 
-[lpdf.io/docs](https://lpdf.io/docs/?utm_campaign=sdk-java&utm_medium=referral&utm_source=readme)
+[lpdf.io/docs](https://lpdf.io/docs/install/?sdk=java&utm_campaign=sdk-java&utm_medium=referral&utm_source=readme)
 
 ## Issues
 
 Report bugs and request features at [github.com/lpdfio/lpdf/issues](https://github.com/lpdfio/lpdf/issues), the one tracker for the engine, the SDKs and the VS Code extension. Pull requests are not accepted.
 
---
+---
 
-Dual-licensed: Community License (free) and Commercial License (paid). See [LICENSE](LICENSE) for full terms.
+Licensed under the Lpdf License. See [LICENSE](LICENSE) for full terms.
