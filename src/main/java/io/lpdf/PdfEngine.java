@@ -98,7 +98,7 @@ public final class PdfEngine {
         return this;
     }
 
-    /** Loads a PNG or JPEG image for the image of the assets whose <code>ref</code>, or with no ref whose name, is {@code name}. */
+    /** Loads an image (JPEG, PNG, WebP, GIF, TIFF or BMP) for the image of the assets whose <code>ref</code>, or with no ref whose name, is {@code name}. */
     public PdfEngine loadImage(String name, byte[] bytes) {
         images.put(Objects.requireNonNull(name, "name"), Objects.requireNonNull(bytes, "bytes"));
         return this;
