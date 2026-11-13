@@ -74,6 +74,15 @@ class KitTest {
     }
 
     @Test
+    void spots_are_a_token_row_of_named_spot_colors_under_the_schema_names() {
+        var doc = L.document(new DocumentAttr().tokens(new DocumentTokens().spots(Map.of(
+                "die", new Spot().ink("Dieline").value("#ff00ff").overprint(true)))), List.of());
+        var die = (Map<?, ?>) ((Map<?, ?>) ((Map<?, ?>) doc.attrs().get("tokens")).get("spots")).get("die");
+
+        assertEquals(Map.of("ink", "Dieline", "value", "#ff00ff", "overprint", true), die);
+    }
+
+    @Test
     void the_attributes_are_under_their_schema_names_and_types() {
         assertEquals("graph", L.section(new SectionAttr().ruling("graph"), List.of()).attrs().get("ruling"));
         assertEquals("l", L.text(new TextAttr().lineHeight("l"), List.of("A token")).attrs().get("line-height"));

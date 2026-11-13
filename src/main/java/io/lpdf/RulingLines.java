@@ -58,7 +58,10 @@ public final class RulingLines extends Attributes {
         return this;
     }
 
-    /** The color of the lines: hex, cmyk(), rgb(), hsl() or a color token. Defaults to line-muted. */
+    /**
+     * The color of the lines: hex, cmyk(), rgb(), hsl(), a color token, or a spot color or a tint of it. Defaults to
+     * line-muted.
+     */
     public RulingLines color(String color) {
         set("color", color);
         return this;

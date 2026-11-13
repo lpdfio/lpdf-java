@@ -58,7 +58,9 @@ public final class DocumentAttr extends Attributes {
         return this;
     }
 
-    /** The design tokens: the colors, gradients, rulings, aliases and the rows of sizes the document names. */
+    /**
+     * The design tokens: the colors, spot colors, gradients, rulings, aliases and the rows of sizes the document names.
+     */
     public DocumentAttr tokens(DocumentTokens tokens) {
         set("tokens", tokens);
         return this;

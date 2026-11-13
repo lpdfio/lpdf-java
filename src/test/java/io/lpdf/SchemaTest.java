@@ -571,6 +571,23 @@ class SchemaTest {
     }
 
     @Test
+    void a_spot_color_of_the_tokens_is_its_ink_and_renders_the_same_from_the_builder_and_its_xml() {
+        var doc = L.document(new DocumentAttr().tokens(new DocumentTokens().spots(Map.of(
+                        "brand", new Spot().ink("PANTONE 1665 C").value("cmyk(0, 85, 100, 0)"),
+                        "die", new Spot().ink("Dieline").value("#ff00ff").overprint(true)))),
+                List.of(L.section(NoAttr, List.of(L.layout(NoAttr, List.of(
+                        L.column(new ColumnAttr().background("brand 30%").border("s die"),
+                                List.of(L.text(new TextAttr().color("brand"), List.of("Spot"))))))))));
+
+        var pdf = render(doc);
+
+        assertEquals(pdf, render(L.toXml(doc)));
+        assertTrue(pdf.contains("/Separation /PANTONE#201665#20C /DeviceCMYK"));
+        assertTrue(pdf.contains("/Separation /Dieline /DeviceRGB"));
+        assertTrue(L.toXml(doc).contains("<spot name=\"die\" ink=\"Dieline\" value=\"#ff00ff\" overprint=\"true\"/>"));
+    }
+
+    @Test
     void bold_text_is_the_bold_face_of_the_font() {
         Function<String, String> doc = attrs ->
                 "<lpdf version=\"1\"><document><section><layout><text " + attrs + ">Hello</text></layout></section></document></lpdf>";

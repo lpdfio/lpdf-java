@@ -19,8 +19,9 @@ public final class Gradient extends Attributes {
     }
 
     /**
-     * The first color: hex, cmyk(), rgb(), hsl() or a color token, CMYK if to is and RGB if it is not. Used with to,
-     * when there are no stop children. For a radial gradient it is the center.
+     * The first color: hex, cmyk(), rgb(), hsl(), a color token, or a spot color or a tint of it: CMYK if to is and RGB
+     * if it is not, or the same spot color as to. Used with to, when there are no stop children. For a radial gradient
+     * it is the center.
      */
     public Gradient from(String from) {
         set("from", from);
@@ -28,8 +29,8 @@ public final class Gradient extends Attributes {
     }
 
     /**
-     * The last color: hex, cmyk(), rgb(), hsl() or a color token. Used with from, when there are no stop children. For
-     * a radial gradient it is the edge.
+     * The last color: hex, cmyk(), rgb(), hsl(), a color token, or a spot color or a tint of it. Used with from, when
+     * there are no stop children. For a radial gradient it is the edge.
      */
     public Gradient to(String to) {
         set("to", to);
