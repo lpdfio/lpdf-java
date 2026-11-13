@@ -4,8 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Design tokens for the whole document, as the <code>tokens</code> element of the XML: the colors, gradients and
- * rulings it names, the aliases of the slots of its scales, and the rows of sizes, each from <code>xs</code> to
+ * Design tokens for the whole document, as the <code>tokens</code> element of the XML: the colors, spot colors,
+ * gradients and rulings it names, the aliases of the slots of its scales, and the rows of sizes, each from <code>xs</code> to
  * <code>xxl</code>. A row given here replaces the default one.
  */
 public final class DocumentTokens extends Attributes {
@@ -17,6 +17,16 @@ public final class DocumentTokens extends Attributes {
     /** The colors, by name: <code>Map.of("brand", "#1a73e8")</code> lets <code>color("brand")</code> name it. */
     public DocumentTokens colors(Map<String, String> colors) {
         set("colors", colors == null ? null : new LinkedHashMap<>(colors));
+        return this;
+    }
+
+    /**
+     * The spot colors, by name, each a {@link Spot}: an ink of its own printed from a plate of its own, with the color
+     * that stands in for it on a screen or a proof, and whether it overprints. A color takes the name, or a tint of the
+     * ink after a space: <code>background("brand 30%")</code>.
+     */
+    public DocumentTokens spots(Map<String, Spot> spots) {
+        set("spots", spots == null ? null : new LinkedHashMap<>(spots));
         return this;
     }
 
