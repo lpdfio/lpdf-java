@@ -96,6 +96,18 @@
   </dependencies>
 
   <build>
+    <!-- The licenses of the crates the engine links, which their licenses ask to travel with the compiled engine: the
+         file the core release attaches beside the engine's WASM, in the jar's META-INF. The engine's compiled classes
+         are a resource folder of their own, which the Endive plugin adds. -->
+    <resources>
+      <resource>
+        <directory>${project.basedir}/wasm</directory>
+        <includes>
+          <include>THIRD_PARTY_LICENSES_ENGINE.txt</include>
+        </includes>
+        <targetPath>META-INF</targetPath>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -197,7 +209,7 @@
             <version>3.4.0</version>
             <configuration>
               <!-- The engine's compiled classes reach the build as a resource folder, which the sources jar would
-                   pack too. The main jar has them; the project has no resources of its own. -->
+                   pack too, and so would the licenses file. The main jar has both. -->
               <excludeResources>true</excludeResources>
             </configuration>
             <executions>
