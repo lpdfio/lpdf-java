@@ -49,7 +49,7 @@ final class WasmRunner {
 
     // ── Calls ─────────────────────────────────────────────────────────────────
 
-    /** The PDF of a render or a stamp: {@code request} with the clock and the cap added. */
+    /** The PDF of a render, a stamp or a merge: {@code request} with the clock and the cap added. */
     byte[] pdf(Map<String, Object> request) {
         // See now(): without it the engine cannot check the key's expiry at all.
         request.put("now", now());
