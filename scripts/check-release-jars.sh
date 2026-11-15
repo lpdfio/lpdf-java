@@ -3,7 +3,8 @@
 # release, which builds them first after core's release is out.
 # - The sources jar holds only Java sources, folders, its manifest and Maven's pom files. The engine's
 #   compiled classes reach the build as a resource folder, which the sources jar would pack too.
-# - The main jar holds every file of that folder: the compiled engine, which users run.
+# - The main jar holds every file of that folder: the compiled engine, which users run, and the file of the
+#   licenses of the crates the engine links.
 # Run from the repo root after `mvn -B -P release verify -Dgpg.skip -DskipTests`.
 set -eu
 
@@ -58,6 +59,15 @@ else
     else
         echo "$main_jar holds the compiled engine: the $(printf '%s\n' "$engine_files" | wc -l | tr -d ' ') files of $engine_dir."
     fi
+fi
+
+# The licenses of the crates the engine links ask for their text to travel with it: the core release attaches the file
+# beside the engine's WASM, and the build puts it in the jar's META-INF.
+if ! printf '%s\n' "${main_entries:-$(jar tf "$main_jar")}" | grep -q -x -F 'META-INF/THIRD_PARTY_LICENSES_ENGINE.txt'; then
+    echo "::error::$main_jar has no META-INF/THIRD_PARTY_LICENSES_ENGINE.txt. The core release carries it beside lpdf-wasi.wasm."
+    failed=1
+else
+    echo "$main_jar holds META-INF/THIRD_PARTY_LICENSES_ENGINE.txt."
 fi
 
 exit "$failed"
