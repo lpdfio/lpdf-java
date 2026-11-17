@@ -429,11 +429,12 @@ class SchemaTest {
     @Test
     void a_section_that_grows_renders_as_its_xml_on_one_page_and_grow_with_columns_is_rejected() {
         var lines = IntStream.rangeClosed(1, 40).mapToObj(n -> L.text(NoAttr, List.of("Line " + n))).toList();
-        var grows = new SectionAttr().size("80mm 40mm").grow("height");
+        var grows = new SectionAttr().size("80mm 40mm").grow(Grow.HEIGHT);
         var document = L.document(NoAttr, List.of(L.section(grows, List.of(L.layout(NoAttr, lines)))));
 
         var xml = L.toXml(document);
         assertTrue(xml.contains("<section grow=\"height\" size=\"80mm 40mm\">"), xml);
+        assertEquals("width height", Grow.WIDTH_HEIGHT);
         var pdf = render(document);
         assertEquals(pdf, render(xml));
         assertEquals(1, pdf.split("/Contents ", -1).length - 1);
