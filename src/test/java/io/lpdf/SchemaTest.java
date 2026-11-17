@@ -427,6 +427,24 @@ class SchemaTest {
     }
 
     @Test
+    void a_section_that_grows_renders_as_its_xml_on_one_page_and_grow_with_columns_is_rejected() {
+        var lines = IntStream.rangeClosed(1, 40).mapToObj(n -> L.text(NoAttr, List.of("Line " + n))).toList();
+        var grows = new SectionAttr().size("80mm 40mm").grow("height");
+        var document = L.document(NoAttr, List.of(L.section(grows, List.of(L.layout(NoAttr, lines)))));
+
+        var xml = L.toXml(document);
+        assertTrue(xml.contains("<section grow=\"height\" size=\"80mm 40mm\">"), xml);
+        var pdf = render(document);
+        assertEquals(pdf, render(xml));
+        assertEquals(1, pdf.split("/Contents ", -1).length - 1);
+
+        var inColumns = L.document(NoAttr, List.of(L.section(new SectionAttr().size("80mm 40mm").grow("height").columns(2),
+                List.of(L.layout(NoAttr, lines)))));
+        var error = assertThrows(EngineException.class, () -> render(inColumns));
+        assertTrue(error.getMessage().contains("grow doesn't work with columns or an inset, in section 1"), error.getMessage());
+    }
+
+    @Test
     void a_section_s_page_numbering_renders_as_its_xml_does_and_labels_the_pages() {
         var footer = L.region(new RegionAttr().pin(Pin.BOTTOM), List.of(L.text(NoAttr, List.of("Page {page} of {pages}"))));
         var document = L.document(NoAttr, List.of(
