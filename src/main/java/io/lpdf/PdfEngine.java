@@ -222,6 +222,51 @@ public final class PdfEngine {
         return wasm.pdf(request);
     }
 
+    /** Merges existing PDFs into one PDF made for printing: see {@link #merge(List, MergeOptions)}. */
+    public byte[] merge(List<MergeSource> sources) {
+        return merge(sources, new MergeOptions());
+    }
+
+    /**
+     * Merges existing PDFs into one PDF made for printing, and returns it, on the caller's thread. Nothing is laid out:
+     * each source page is drawn on a page of the size it has as a viewer shows it, in the order of the sources, with the
+     * annotations that print flattened from their stored appearances, so forms, links and bookmarks are gone and what
+     * prints is what the page looked like. Layers cross over, each on or off by default as it prints in its source. The
+     * output is made for printing, not for reading on screen, and its version is the highest among the sources'.
+     *
+     * <p>Each source opens without a password. A file that needs one, a file whose owner password restricts printing or
+     * copying (unless {@link MergeOptions#allowRestricted}), a signed file (unless {@link MergeOptions#allowSigned}), a
+     * form field that has a value and no stored appearance, which would print blank, and a file that can't be read are
+     * each an error that names the file. {@link MergeOptions#doubleSided} adds a blank side after a document with an odd
+     * number of pages. Without a license key each merged page gets the attribution line in its top-right corner, with no
+     * link.
+     *
+     * @param sources the files to merge, in the order of the pages
+     * @param options what the merge does beyond its defaults
+     * @throws IllegalArgumentException when a source lacks its name or its PDF
+     * @throws EngineException          when the list is empty, or a file is not a PDF or can't be merged, saying which
+     *                                  and why; or the merge runs past the timeout or needs more memory than the cap or
+     *                                  the JVM's heap has, or the engine crashes
+     */
+    public byte[] merge(List<MergeSource> sources, MergeOptions options) {
+        Objects.requireNonNull(sources, "sources");
+        Objects.requireNonNull(options, "options");
+        var files = new ArrayList<Map<String, Object>>();
+        for (int i = 0; i < sources.size(); i++) {
+            var source = sources.get(i);
+            if (source == null) throw new NullPointerException("source " + (i + 1) + " is null");
+            var file = new LinkedHashMap<>(source.values());
+            file.put("pdf", Base64.getEncoder().encodeToString((byte[]) file.get("pdf")));
+            files.add(file);
+        }
+        var request = new LinkedHashMap<String, Object>();
+        request.put("method", "merge");
+        request.put("key", licenseKey);
+        request.put("sources", files);
+        request.put("options", options.values());
+        return wasm.pdf(request);
+    }
+
     // ── Requests ──────────────────────────────────────────────────────────────
 
     /** A render's request: the input, the files it names and the loaded ones, and the options of the render. */
