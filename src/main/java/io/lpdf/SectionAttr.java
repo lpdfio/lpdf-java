@@ -154,4 +154,14 @@ public final class SectionAttr extends Attributes {
         set("column-fill", columnFill);
         return this;
     }
+
+    /**
+     * The sizes the page grows in to fit the content, width, height or width height, where it would start a new page or
+     * squeeze the content. size is then the starting size, the smallest the page can be. A section with columns or an
+     * inset refuses it.
+     */
+    public SectionAttr grow(String grow) {
+        set("grow", grow);
+        return this;
+    }
 }
