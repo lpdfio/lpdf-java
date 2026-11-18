@@ -31,6 +31,11 @@ class CrossIndustryInvoiceTest {
     private static final String CREATED_ON = "2026-11-18T10:00:00Z";
     private static final String NOTE = "Payable within 30 days, by bank transfer.";
     private static final Path FACTURX = Snapshots.ROOT.resolve("test/assets/files/facturx");
+    private static final String RECHNUNG_MAP = "<cross-industry-invoice-map prefix=\"rechnung\">"
+            + "<value name=\"nummer\" path=\"rsm:ExchangedDocument/ram:ID\"/></cross-industry-invoice-map>";
+    private static final String RECHNUNG_TEMPLATE = "<lpdf version=\"1\"><assets><font name=\"body\" src=\"../assets/fonts/SourceSans3-Regular.otf\"/>"
+            + "</assets><document size=\"a4\" font=\"body\"><section><layout margin=\"48pt\">"
+            + "<text data-value=\"rechnung:nummer\">0000</text></layout></section></document></lpdf>";
 
     private static byte[] bytes(Path path) {
         try {
@@ -205,9 +210,8 @@ class CrossIndustryInvoiceTest {
 
     @Test
     void reads_through_a_map_given_under_its_own_names() {
-        var invoiceMap = "<cross-industry-invoice-map prefix=\"rechnung\"><value name=\"nummer\" path=\"rsm:ExchangedDocument/ram:ID\"/></cross-industry-invoice-map>";
         var xml = new String(invoice("en16931.xml"), StandardCharsets.UTF_8);
-        assertEquals(Map.of("nummer", "2026-0412"), LCrossIndustryInvoice.extractInvoiceData(xml, new ExtractInvoiceDataOptions().invoiceMap(invoiceMap)));
+        assertEquals(Map.of("nummer", "2026-0412"), LCrossIndustryInvoice.extractInvoiceData(xml, new ExtractInvoiceDataOptions().invoiceMap(RECHNUNG_MAP)));
     }
 
     @Test
@@ -215,6 +219,25 @@ class CrossIndustryInvoiceTest {
         assumeTrue(Snapshots.present(), "the fixtures of core are not here");
         var xml = new String(invoice("en16931.xml"), StandardCharsets.UTF_8);
         assertEquals(LCrossIndustryInvoice.extractInvoiceData(invoice("en16931.xml")), LCrossIndustryInvoice.extractInvoiceData(xml));
+    }
+
+    @Test
+    void fills_a_template_through_a_map_given_under_its_own_names() {
+        assumeTrue(Snapshots.present(), "the fixtures of core are not here");
+        var options = new GeneratePdfOptions().invoiceXml(invoice("en16931.xml")).invoiceMap(RECHNUNG_MAP).createdOn(CREATED_ON);
+        var engine = engine();
+        var bound = LCrossIndustryInvoice.generatePdf(engine, RECHNUNG_TEMPLATE, options);
+        var written = RECHNUNG_TEMPLATE.replace("<text data-value=\"rechnung:nummer\">0000</text>", "<text>2026-0412</text>");
+        assertArrayEquals(LCrossIndustryInvoice.generatePdf(engine, written, options), bound);
+    }
+
+    @Test
+    void refuses_a_template_name_that_the_map_given_lacks() {
+        assumeTrue(Snapshots.present(), "the fixtures of core are not here");
+        var typo = RECHNUNG_TEMPLATE.replace("rechnung:nummer", "rechnung:nummr");
+        var error = assertThrows(EngineException.class, () -> LCrossIndustryInvoice.generatePdf(engine(), typo,
+                new GeneratePdfOptions().invoiceXml(invoice("en16931.xml")).invoiceMap(RECHNUNG_MAP).createdOn(CREATED_ON)));
+        assertEquals("data-value=\"rechnung:nummr\": 'nummr' is not in the map: the invoice map has nummer", error.getMessage());
     }
 
     @Test
