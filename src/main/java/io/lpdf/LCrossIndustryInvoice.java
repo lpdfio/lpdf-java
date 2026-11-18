@@ -92,7 +92,8 @@ public final class LCrossIndustryInvoice {
      * @param invoiceXml the invoice's XML, an EN 16931 Cross Industry Invoice
      * @param options    the map, and the format functions
      * @throws EngineException      when the map is not one or doesn't fit the schema, the invoice is not a Cross
-     *                              Industry Invoice or is MINIMUM or BASIC WL, or lacks a value the map marks required
+     *                              Industry Invoice or is MINIMUM or BASIC WL, or lacks a value the map marks
+     *                              required; or the read runs past the default timeout or memory cap
      * @throws NullPointerException when a format function returns null, naming its type and the entry
      */
     public static Map<String, Object> extractInvoiceData(byte[] invoiceXml, ExtractInvoiceDataOptions options) {

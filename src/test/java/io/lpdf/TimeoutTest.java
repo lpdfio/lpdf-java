@@ -62,6 +62,17 @@ class TimeoutTest {
     }
 
     @Test
+    void the_reading_of_an_invoice_past_its_timeout_throws_naming_the_reading() {
+        var engine = standIn(SPIN_FOREVER, new EngineOptions().timeout(1));
+
+        var error = assertThrows(EngineException.class,
+                () -> LCrossIndustryInvoice.generatePdf(engine, MINIMAL, standInInvoice()));
+
+        assertEquals("The reading of the invoice timed out after 1 second.", error.getMessage());
+        assertFalse(Thread.currentThread().isInterrupted(), "the timeout's interrupt is left set on the thread");
+    }
+
+    @Test
     void a_render_with_a_timeout_of_0_runs_with_no_limit() {
         var engine = standIn(SPIN_TWO_SECONDS, new EngineOptions().timeout(0));
 
@@ -99,25 +110,21 @@ class TimeoutTest {
     @Test
     void an_interrupt_of_the_app_s_own_stops_the_render_and_stays_set() throws InterruptedException {
         var engine = standIn(SPIN_FOREVER, new EngineOptions().timeout(0));
-        var error = new AtomicReference<Throwable>();
-        var interrupted = new AtomicReference<Boolean>();
 
-        var render = new Thread(() -> {
-            try {
-                engine.render(MINIMAL);
-            } catch (Throwable e) {
-                error.set(e);
-            }
-            interrupted.set(Thread.currentThread().isInterrupted());
-        });
-        render.start();
-        Thread.sleep(200);
-        render.interrupt();
-        render.join(5000);
+        var stopped = interruptDuring(() -> engine.render(MINIMAL));
 
-        assertFalse(render.isAlive(), "the render did not stop");
-        assertEquals("The render was interrupted.", error.get().getMessage());
-        assertTrue(interrupted.get(), "the app's interrupt was cleared");
+        assertEquals("The render was interrupted.", stopped.error().getMessage());
+        assertTrue(stopped.interruptSet(), "the app's interrupt was cleared");
+    }
+
+    @Test
+    void an_interrupt_of_the_app_s_own_stops_the_reading_of_an_invoice_naming_it() throws InterruptedException {
+        var engine = standIn(SPIN_FOREVER, new EngineOptions().timeout(0));
+
+        var stopped = interruptDuring(() -> LCrossIndustryInvoice.generatePdf(engine, MINIMAL, standInInvoice()));
+
+        assertEquals("The reading of the invoice was interrupted.", stopped.error().getMessage());
+        assertTrue(stopped.interruptSet(), "the app's interrupt was cleared");
     }
 
     /** A render stopped at its deadline stops nothing else, and leaves the engine rendering right. */
@@ -180,6 +187,39 @@ class TimeoutTest {
     void a_fixture_renders_with_a_timeout_of_0() {
         assumeTrue(Snapshots.present(), "the fixtures of core are not here");
         Snapshots.assertMatches("bench_l", Snapshots.render("bench_l", new EngineOptions().timeout(0)));
+    }
+
+    /**
+     * The options of a {@code generatePdf} whose invoice a stand-in module reads: it reads nothing, so any bytes do.
+     */
+    static GeneratePdfOptions standInInvoice() {
+        return new GeneratePdfOptions().invoiceXml("<invoice/>".getBytes(StandardCharsets.UTF_8))
+                .createdOn("2026-11-18T10:00:00Z");
+    }
+
+    /** What a call the app interrupts after 200 ms left: its error, and whether the interrupt is still set. */
+    private record Interrupted(Throwable error, boolean interruptSet) {
+    }
+
+    /** Runs {@code call} on a thread of its own, and interrupts it after 200 ms, as an app of its own would. */
+    private static Interrupted interruptDuring(Runnable call) throws InterruptedException {
+        var error = new AtomicReference<Throwable>();
+        var interrupted = new AtomicReference<Boolean>();
+        var thread = new Thread(() -> {
+            try {
+                call.run();
+            } catch (Throwable e) {
+                error.set(e);
+            }
+            interrupted.set(Thread.currentThread().isInterrupted());
+        });
+        thread.start();
+        Thread.sleep(200);
+        thread.interrupt();
+        thread.join(5000);
+
+        assertFalse(thread.isAlive(), "the call did not stop");
+        return new Interrupted(error.get(), interrupted.get());
     }
 
     /** An engine that runs the module of {@code wat} in place of the engine's own, on Endive's interpreter. */
