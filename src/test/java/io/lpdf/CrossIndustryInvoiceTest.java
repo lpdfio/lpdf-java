@@ -78,7 +78,10 @@ class CrossIndustryInvoiceTest {
             "typeCode", Map.of("380", "Invoice", "381", "Credit note"),
             "lines.unit", Map.of("H87", "pcs", "KGM", "kg"));
 
-    /** How values are written on the page, as the examples write them: Java's own formatters, and the words for the codes. */
+    /**
+     * How values are written on the page: dates and amounts through Java's own formatters, and a code as the word for it
+     * under its entry's name, or as it came when there is none.
+     */
     private static final InvoiceFormat FORMAT = new InvoiceFormat()
             .date((value, entryName) -> LocalDate.parse(value).format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)))
             .amount((value, entryName) -> String.format(Locale.UK, "%,.2f", new BigDecimal(value)))
@@ -94,7 +97,11 @@ class CrossIndustryInvoiceTest {
         return (List<Object>) value;
     }
 
-    /** The page of the template, built in code with the values of {@code extractInvoiceData}, as the second example builds it. */
+    /**
+     * The page of core's {@code showcase-cross-industry-invoice} fixture built in code, element for element, from the
+     * values of {@code extractInvoiceData}, so that it renders to the bytes of the template filled by
+     * {@code generatePdf}.
+     */
     private static PdfDocument documentInCode(Map<String, Object> invoiceData) {
         var muted = new TextAttr().fontSize("9pt").color("#5b6475");
         var mutedRight = new TextAttr().fontSize("9pt").color("#5b6475").align("right");
@@ -176,6 +183,7 @@ class CrossIndustryInvoiceTest {
 
     @Test
     void fills_the_template_with_the_invoice_and_gives_the_pdf_core_gives() {
+        assumeTrue(Snapshots.present(), "the fixtures of core are not here");
         var pdf = LCrossIndustryInvoice.generatePdf(engine(), template(), new GeneratePdfOptions()
                 .invoiceXml(invoice("en16931.xml")).data(Map.of("note", NOTE)).createdOn(CREATED_ON));
         assertEquals(Snapshots.snapshot("showcase-cross-industry-invoice"), Snapshots.sha256(pdf));
@@ -186,6 +194,7 @@ class CrossIndustryInvoiceTest {
 
     @Test
     void gives_the_same_page_from_the_template_and_from_the_document_built_in_code() {
+        assumeTrue(Snapshots.present(), "the fixtures of core are not here");
         var invoiceXml = invoice("en16931.xml");
         var engine = engine();
         var fromTemplate = LCrossIndustryInvoice.generatePdf(engine, template(), new GeneratePdfOptions()
@@ -198,6 +207,7 @@ class CrossIndustryInvoiceTest {
 
     @Test
     void extracts_the_values_core_reads_and_formats_them_by_type_and_entry_name() {
+        assumeTrue(Snapshots.present(), "the fixtures of core are not here");
         var expected = Json.readObject(new String(bytes(FACTURX.resolve("case-vat-rates.json")), StandardCharsets.UTF_8));
         assertEquals(expected, LCrossIndustryInvoice.extractInvoiceData(invoice("case-vat-rates.xml")));
         var formatted = LCrossIndustryInvoice.extractInvoiceData(invoice("en16931.xml"), new ExtractInvoiceDataOptions().format(FORMAT));
@@ -210,6 +220,7 @@ class CrossIndustryInvoiceTest {
 
     @Test
     void reads_through_a_map_given_under_its_own_names() {
+        assumeTrue(Snapshots.present(), "the fixtures of core are not here");
         var xml = new String(invoice("en16931.xml"), StandardCharsets.UTF_8);
         assertEquals(Map.of("nummer", "2026-0412"), LCrossIndustryInvoice.extractInvoiceData(xml, new ExtractInvoiceDataOptions().invoiceMap(RECHNUNG_MAP)));
     }
@@ -280,6 +291,7 @@ class CrossIndustryInvoiceTest {
 
     @Test
     void refuses_what_the_engine_refuses_with_its_error() {
+        assumeTrue(Snapshots.present(), "the fixtures of core are not here");
         var error = assertThrows(EngineException.class, () -> LCrossIndustryInvoice.extractInvoiceData(invoice("minimum.xml")));
         assertTrue(error.getMessage().startsWith("the invoice's profile is MINIMUM"), error.getMessage());
         var typo = template().replace("invoice:seller.name", "invoice:sellr.name");
