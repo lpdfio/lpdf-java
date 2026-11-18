@@ -101,6 +101,11 @@ public final class LCrossIndustryInvoice {
         return formatted(READER.extractInvoiceData(invoiceXml, options.invoiceMap()), options.format());
     }
 
+    /** {@link #extractInvoiceData(byte[])} of XML given as text. */
+    public static Map<String, Object> extractInvoiceData(String invoiceXml) {
+        return extractInvoiceData(invoiceXml, new ExtractInvoiceDataOptions());
+    }
+
     /** {@link #extractInvoiceData(byte[], ExtractInvoiceDataOptions)} of XML given as text. */
     public static Map<String, Object> extractInvoiceData(String invoiceXml, ExtractInvoiceDataOptions options) {
         Objects.requireNonNull(invoiceXml, "invoiceXml");

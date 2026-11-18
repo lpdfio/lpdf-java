@@ -211,6 +211,13 @@ class CrossIndustryInvoiceTest {
     }
 
     @Test
+    void reads_the_xml_given_as_text_as_it_reads_its_bytes() {
+        assumeTrue(Snapshots.present(), "the fixtures of core are not here");
+        var xml = new String(invoice("en16931.xml"), StandardCharsets.UTF_8);
+        assertEquals(LCrossIndustryInvoice.extractInvoiceData(invoice("en16931.xml")), LCrossIndustryInvoice.extractInvoiceData(xml));
+    }
+
+    @Test
     void reads_the_invoice_of_a_template_under_the_memory_cap_of_its_engine() {
         assumeTrue(Snapshots.present(), "the fixtures of core are not here");
         // 1.2 MB of XML: more than the cap of 1 MB on its own, and small enough to read well within the default timeout.
