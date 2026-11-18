@@ -307,15 +307,26 @@ class CrossIndustryInvoiceTest {
     }
 
     @Test
-    void refuses_what_the_engine_refuses_with_its_error() {
+    void refuses_a_minimum_invoice_with_the_engine_s_error() {
         assumeTrue(Snapshots.present(), "the fixtures of core are not here");
         var error = assertThrows(EngineException.class, () -> LCrossIndustryInvoice.extractInvoiceData(invoice("minimum.xml")));
         assertTrue(error.getMessage().startsWith("the invoice's profile is MINIMUM"), error.getMessage());
+    }
+
+    @Test
+    void refuses_a_template_path_that_the_default_map_lacks_with_the_engine_s_error() {
+        assumeTrue(Snapshots.present(), "the fixtures of core are not here");
         var typo = template().replace("invoice:seller.name", "invoice:sellr.name");
-        error = assertThrows(EngineException.class, () -> LCrossIndustryInvoice.generatePdf(engine(), typo,
+        var error = assertThrows(EngineException.class, () -> LCrossIndustryInvoice.generatePdf(engine(), typo,
                 new GeneratePdfOptions().invoiceXml(invoice("en16931.xml")).createdOn(CREATED_ON)));
         assertTrue(error.getMessage().startsWith("data-value=\"invoice:sellr.name\": 'sellr' is not in the map"), error.getMessage());
-        assertThrows(IllegalArgumentException.class, () -> LCrossIndustryInvoice.generatePdf(engine(), template(),
-                new GeneratePdfOptions().invoiceXml(invoice("en16931.xml"))));
+    }
+
+    @Test
+    void refuses_generate_pdf_without_a_creation_date() {
+        var options = new GeneratePdfOptions().invoiceXml("<invoice/>".getBytes(StandardCharsets.UTF_8));
+        var error = assertThrows(IllegalArgumentException.class,
+                () -> LCrossIndustryInvoice.generatePdf(L.engine(), TimeoutTest.MINIMAL, options));
+        assertEquals("generatePdf needs createdOn, which PDF/A requires", error.getMessage());
     }
 }
