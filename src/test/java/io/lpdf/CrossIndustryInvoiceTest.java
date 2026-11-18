@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -48,7 +50,23 @@ class CrossIndustryInvoiceTest {
 
     /** An unlicensed engine with the template's font loaded under its name. */
     private static PdfEngine engine() {
-        return L.engine().loadFont("body", bytes(Snapshots.ROOT.resolve("test/assets/fonts/SourceSans3-Regular.otf")));
+        return engine(new EngineOptions());
+    }
+
+    /** An unlicensed engine with {@code options} and the template's font loaded under its name. */
+    private static PdfEngine engine(EngineOptions options) {
+        return L.engine(options).loadFont("body", bytes(Snapshots.ROOT.resolve("test/assets/fonts/SourceSans3-Regular.otf")));
+    }
+
+    /** en16931.xml with its first line repeated {@code count} times in place of its lines. */
+    private static byte[] invoiceWithLines(int count) {
+        var xml = new String(invoice("en16931.xml"), StandardCharsets.UTF_8);
+        var open = "<ram:IncludedSupplyChainTradeLineItem>";
+        var close = "</ram:IncludedSupplyChainTradeLineItem>";
+        var start = xml.indexOf(open);
+        var line = xml.substring(start, xml.indexOf(close) + close.length());
+        var end = xml.lastIndexOf(close) + close.length();
+        return (xml.substring(0, start) + line.repeat(count) + xml.substring(end)).getBytes(StandardCharsets.UTF_8);
     }
 
     private static final Map<String, Map<String, String>> CODE_NAMES = Map.of(
@@ -190,6 +208,27 @@ class CrossIndustryInvoiceTest {
         var invoiceMap = "<cross-industry-invoice-map prefix=\"rechnung\"><value name=\"nummer\" path=\"rsm:ExchangedDocument/ram:ID\"/></cross-industry-invoice-map>";
         var xml = new String(invoice("en16931.xml"), StandardCharsets.UTF_8);
         assertEquals(Map.of("nummer", "2026-0412"), LCrossIndustryInvoice.extractInvoiceData(xml, new ExtractInvoiceDataOptions().invoiceMap(invoiceMap)));
+    }
+
+    @Test
+    void reads_the_invoice_of_a_template_under_the_memory_cap_of_its_engine() {
+        assumeTrue(Snapshots.present(), "the fixtures of core are not here");
+        // 1.2 MB of XML: more than the cap of 1 MB on its own, and small enough to read well within the default timeout.
+        var invoiceXml = invoiceWithLines(1_000);
+        assertTrue(invoiceXml.length > 1_048_576);
+        assertEquals(1_000, list(LCrossIndustryInvoice.extractInvoiceData(invoiceXml).get("lines")).size());
+        var formatted = new AtomicInteger();
+        var format = new InvoiceFormat().amount((value, entryName) -> {
+            formatted.incrementAndGet();
+            return value;
+        });
+        var error = assertThrows(EngineException.class, () -> LCrossIndustryInvoice.generatePdf(
+                engine(new EngineOptions().maxMemoryMb(1)), template(), new GeneratePdfOptions()
+                        .invoiceXml(invoiceXml).format(format).data(Map.of("note", NOTE)).createdOn(CREATED_ON)));
+        assertTrue(error.getMessage().startsWith("the render needs more memory than its cap of 1 MB"), error.getMessage());
+        // The read itself was refused: read under the default limits, it would have handed the amounts to the format
+        // function before the render failed.
+        assertEquals(0, formatted.get());
     }
 
     @Test

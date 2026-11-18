@@ -20,8 +20,8 @@ import java.util.Objects;
  */
 public final class LCrossIndustryInvoice {
     /**
-     * The engine that reads invoices with no engine of the caller's: it uses no fonts and no key, under the default
-     * time and memory limits.
+     * The runner of {@link #extractInvoiceData(byte[], ExtractInvoiceDataOptions)} and {@link #defaultInvoiceMap()},
+     * which take no engine: the default time and memory limits. {@code generatePdf} reads through its engine instead.
      */
     private static final WasmRunner READER = new WasmRunner(new EngineOptions().timeout(), new EngineOptions().maxMemoryMb());
 
@@ -34,14 +34,15 @@ public final class LCrossIndustryInvoice {
      * PDF/A-3, 3b unless the template sets 3a or 3u, and carries the XML as {@code factur-x.xml}, or
      * {@code xrechnung.xml} for XRECHNUNG. The template says only how the invoice looks: it declares no invoice file.
      *
-     * @param engine   the engine, which carries the fonts, the license key and the limits
+     * @param engine   the engine, which carries the fonts, the license key and the limits: its timeout and memory cap
+     *                 hold for the read of the invoice as for the render
      * @param template how the invoice looks, as lpdf XML
      * @param options  the invoice's XML, and the map, the format functions, the data and the creation date
      * @throws EngineException          when the engine refuses the map or the invoice, as
      *                                  {@link #extractInvoiceData(byte[], ExtractInvoiceDataOptions)} says, or a
      *                                  template path under the prefix that the map lacks, a PDF/A level other than 3a,
      *                                  3b or 3u, {@code encrypt}, {@code pdfx}, or a template that declares the invoice
-     *                                  file
+     *                                  file; or the read or the render runs past the engine's timeout or memory cap
      * @throws IllegalArgumentException when the invoice's XML or the creation date is missing
      */
     public static byte[] generatePdf(PdfEngine engine, String template, GeneratePdfOptions options) {
@@ -51,7 +52,7 @@ public final class LCrossIndustryInvoice {
         var invoice = new LinkedHashMap<String, Object>();
         invoice.put("xml", Base64.getEncoder().encodeToString(options.invoiceXml()));
         invoice.put("map", options.invoiceMap());
-        invoice.put("data", read(options.invoiceXml(), options.invoiceMap(), options.format()));
+        invoice.put("data", formatted(engine.extractInvoiceData(options.invoiceXml(), options.invoiceMap()), options.format()));
         return engine.renderInvoice(template, invoice, options.data(), options.createdOn());
     }
 
@@ -84,7 +85,8 @@ public final class LCrossIndustryInvoice {
     /**
      * The values of an invoice as plain data: a value is a field, a group a map, a list a list, all strings, as the map
      * names them. A value the invoice lacks is absent, and a list with no items is empty. For code that needs the
-     * values itself: a document built in code, choosing a template, naming the file.
+     * values itself: a document built in code, choosing a template, naming the file. The read runs under the default
+     * timeout and memory cap of {@link EngineOptions}.
      *
      * @param invoiceXml the invoice's XML, an EN 16931 Cross Industry Invoice
      * @param options    the map, and the format functions
@@ -94,7 +96,7 @@ public final class LCrossIndustryInvoice {
     public static Map<String, Object> extractInvoiceData(byte[] invoiceXml, ExtractInvoiceDataOptions options) {
         Objects.requireNonNull(invoiceXml, "invoiceXml");
         Objects.requireNonNull(options, "options");
-        return read(invoiceXml, options.invoiceMap(), options.format());
+        return formatted(READER.extractInvoiceData(invoiceXml, options.invoiceMap()), options.format());
     }
 
     /** {@link #extractInvoiceData(byte[], ExtractInvoiceDataOptions)} of XML given as text. */
@@ -114,10 +116,12 @@ public final class LCrossIndustryInvoice {
         if (options.createdOn() == null) throw new IllegalArgumentException("generatePdf needs createdOn, which PDF/A requires");
     }
 
-    /** The values of an invoice, read by the engine, with the format function of each typed one applied. */
+    /**
+     * The values of the engine's {@code extract_invoice_data} answer, with the format function of each typed one
+     * applied.
+     */
     @SuppressWarnings("unchecked")
-    private static Map<String, Object> read(byte[] invoiceXml, String invoiceMap, InvoiceFormat format) {
-        var answer = READER.extractInvoiceData(invoiceXml, invoiceMap);
+    private static Map<String, Object> formatted(Map<String, Object> answer, InvoiceFormat format) {
         var data = (Map<String, Object>) answer.get("data");
         for (var entry : (List<Object>) answer.get("typed")) {
             var typed = (Map<String, Object>) entry;

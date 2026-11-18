@@ -270,6 +270,15 @@ public final class PdfEngine {
     // ── Requests ──────────────────────────────────────────────────────────────
 
     /**
+     * {@link LCrossIndustryInvoice#generatePdf(PdfEngine, String, GeneratePdfOptions)}'s read of the invoice: the
+     * engine's {@code extract_invoice_data} on this engine, so its timeout and memory cap hold for the read as they do
+     * for the render.
+     */
+    Map<String, Object> extractInvoiceData(byte[] invoiceXml, String invoiceMap) {
+        return wasm.extractInvoiceData(invoiceXml, invoiceMap);
+    }
+
+    /**
      * {@link LCrossIndustryInvoice#generatePdf(PdfEngine, String, GeneratePdfOptions)}: a render of a template with
      * {@code invoice}, its XML as base64, the map and the values read from it.
      */
