@@ -44,6 +44,7 @@ public final class LCrossIndustryInvoice {
      *                                  3b or 3u, {@code encrypt}, {@code pdfx}, or a template that declares the invoice
      *                                  file; or the read or the render runs past the engine's timeout or memory cap
      * @throws IllegalArgumentException when the invoice's XML or the creation date is missing
+     * @throws NullPointerException     when a format function returns null, naming its type and the entry
      */
     public static byte[] generatePdf(PdfEngine engine, String template, GeneratePdfOptions options) {
         Objects.requireNonNull(engine, "engine");
@@ -90,8 +91,9 @@ public final class LCrossIndustryInvoice {
      *
      * @param invoiceXml the invoice's XML, an EN 16931 Cross Industry Invoice
      * @param options    the map, and the format functions
-     * @throws EngineException when the map is not one or doesn't fit the schema, the invoice is not a Cross Industry
-     *                         Invoice or is MINIMUM or BASIC WL, or lacks a value the map marks required
+     * @throws EngineException      when the map is not one or doesn't fit the schema, the invoice is not a Cross
+     *                              Industry Invoice or is MINIMUM or BASIC WL, or lacks a value the map marks required
+     * @throws NullPointerException when a format function returns null, naming its type and the entry
      */
     public static Map<String, Object> extractInvoiceData(byte[] invoiceXml, ExtractInvoiceDataOptions options) {
         Objects.requireNonNull(invoiceXml, "invoiceXml");
@@ -125,13 +127,17 @@ public final class LCrossIndustryInvoice {
         var data = (Map<String, Object>) answer.get("data");
         for (var entry : (List<Object>) answer.get("typed")) {
             var typed = (Map<String, Object>) entry;
-            var fn = format == null ? null : format.of((String) typed.get("type"));
+            var type = (String) typed.get("type");
+            var fn = format == null ? null : format.of(type);
             if (fn == null) continue;
             var at = (List<Object>) typed.get("at");
             Object holder = data;
             for (var step : at.subList(0, at.size() - 1)) holder = step(holder, step);
             var last = at.get(at.size() - 1);
-            var written = fn.apply((String) step(holder, last), (String) typed.get("name"));
+            var name = (String) typed.get("name");
+            // Refused here, where the function and its entry are known.
+            var written = Objects.requireNonNull(fn.apply((String) step(holder, last), name), () -> "format." + type
+                    + " returned null for '" + name + "': return the text to bind, or the value as it came.");
             if (last instanceof Number index) ((List<Object>) holder).set(index.intValue(), written);
             else ((Map<String, Object>) holder).put((String) last, written);
         }

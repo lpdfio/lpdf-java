@@ -232,6 +232,16 @@ class CrossIndustryInvoiceTest {
     }
 
     @Test
+    void refuses_a_format_function_that_returns_null_naming_its_type_and_entry() {
+        assumeTrue(Snapshots.present(), "the fixtures of core are not here");
+        var format = new InvoiceFormat().code((value, entryName) -> entryName.equals("lines.unit") ? null : value);
+        var error = assertThrows(NullPointerException.class, () -> LCrossIndustryInvoice.extractInvoiceData(
+                invoice("en16931.xml"), new ExtractInvoiceDataOptions().format(format)));
+        assertEquals("format.code returned null for 'lines.unit': return the text to bind, or the value as it came.",
+                error.getMessage());
+    }
+
+    @Test
     void gives_the_default_map_as_xml_text() {
         var invoiceMap = LCrossIndustryInvoice.defaultInvoiceMap();
         assertTrue(invoiceMap.startsWith("<?xml"));

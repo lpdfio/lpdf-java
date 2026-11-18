@@ -5,8 +5,8 @@ import java.util.function.BiFunction;
 /**
  * How the values of each type are written on the page, for {@link LCrossIndustryInvoice}: each function takes the value
  * in its normal form and the full name of its entry in the map, without the prefix or an item number
- * ({@code seller.country}, {@code lines.unit}), and returns the text to bind. A type without a function is bound as the
- * invoice has it.
+ * ({@code seller.country}, {@code lines.unit}), and returns the text to bind, never null: a value it leaves alone is
+ * returned as it came. A type without a function is bound as the invoice has it.
  *
  * <pre>{@code
  * new InvoiceFormat().date((value, entryName) -> LocalDate.parse(value).format(DateTimeFormatter.ofPattern("d.M.yyyy")))
