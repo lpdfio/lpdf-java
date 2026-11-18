@@ -4,6 +4,7 @@ target
 wasm/lpdf.wasm
 wasm/THIRD_PARTY_LICENSES_ENGINE.txt
 
-# The fixtures and snapshots of core, copied in by CI
+# The fixtures, snapshots and assets of core, copied in by CI
 test/fixtures
 test/snapshots
+test/assets

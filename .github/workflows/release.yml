@@ -121,21 +121,23 @@ jobs:
           sed -i "s|<version>0.0.0-SNAPSHOT</version>|<version>$VERSION</version>|" pom.xml
           grep -q "<version>$VERSION</version>" pom.xml
 
-      # ── Fetch test fixtures and snapshots from core ──────────────────────────
-      # The fixture XML files and golden SHA-256 snapshots live in the core
-      # monorepo (lpdfio/lpdf).  Sparse-clone only those two directories so
-      # that snapshot tests can actually run in this adapter's CI.
+      # ── Fetch test fixtures, snapshots and assets from core ──────────────────
+      # The fixture XML files, the golden SHA-256 snapshots and the assets the
+      # tests read, such as fonts and invoices, live in the core monorepo
+      # (lpdfio/lpdf).  Sparse-clone only those three directories so that
+      # snapshot tests can actually run in this adapter's CI.
       # Cloned at CORE_TAG, the engine this release ships, so the snapshots
       # match it even after core's main has moved on (e.g. between an RC and
       # the final release).
-      - name: Fetch test fixtures and snapshots from core
+      - name: Fetch test fixtures, snapshots and assets from core
         run: |
           git clone --depth 1 --branch "$CORE_TAG" --filter=blob:none --sparse \
             https://github.com/lpdfio/lpdf.git _core
-          git -C _core sparse-checkout set test/fixtures test/snapshots
-          mkdir -p test/fixtures test/snapshots
+          git -C _core sparse-checkout set test/fixtures test/snapshots test/assets
+          mkdir -p test/fixtures test/snapshots test/assets
           cp -r _core/test/fixtures/. test/fixtures/
           cp -r _core/test/snapshots/. test/snapshots/
+          cp -r _core/test/assets/. test/assets/
           rm -rf _core
 
       - name: Build and test

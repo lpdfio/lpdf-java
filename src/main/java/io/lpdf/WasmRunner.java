@@ -6,6 +6,8 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -28,9 +30,15 @@ final class WasmRunner {
     static final Supplier<Instance.Builder> ENGINE =
             () -> Instance.builder(LpdfModule.load()).withMachineFactory(LpdfModule::create);
 
+    /** What a call runs, as its errors name it. */
+    private static final String RENDER = "render";
+    private static final String INVOICE_READ = "reading of the invoice";
+
     private final Supplier<Instance.Builder> module;
     private final int timeout;
     private final int maxMemoryMb;
+    /** Whether the caller's options set the cap, so that the heap's error may advise a lower one. */
+    private final boolean capOfOptions;
 
     /**
      * @param timeout     the seconds a call may run before it stops with an {@link EngineException}, or 0 for no limit
@@ -42,9 +50,23 @@ final class WasmRunner {
 
     /** A runner of {@code module} in place of the engine: for the tests, a module that runs long, or crashes. */
     WasmRunner(Supplier<Instance.Builder> module, int timeout, int maxMemoryMb) {
+        this(module, timeout, maxMemoryMb, true);
+    }
+
+    private WasmRunner(Supplier<Instance.Builder> module, int timeout, int maxMemoryMb, boolean capOfOptions) {
         this.module = module;
         this.timeout = timeout;
         this.maxMemoryMb = maxMemoryMb;
+        this.capOfOptions = capOfOptions;
+    }
+
+    /**
+     * A runner of {@code module} for the calls that take no engine, such as
+     * {@link LCrossIndustryInvoice#extractInvoiceData(byte[], ExtractInvoiceDataOptions)}: the default timeout and cap,
+     * which no option of the caller's sets, so its heap's error advises more heap alone.
+     */
+    static WasmRunner withoutEngine(Supplier<Instance.Builder> module) {
+        return new WasmRunner(module, EngineOptions.DEFAULT_TIMEOUT, EngineOptions.DEFAULT_MAX_MEMORY_MB, false);
     }
 
     // ── Calls ─────────────────────────────────────────────────────────────────
@@ -54,7 +76,7 @@ final class WasmRunner {
         // See now(): without it the engine cannot check the key's expiry at all.
         request.put("now", now());
         request.put("max_memory_mb", maxMemoryMb);
-        var answer = Json.readObject(run(Json.write(request)));
+        var answer = Json.readObject(run(Json.write(request), RENDER));
         if (answer.containsKey("error")) throw new EngineException(String.valueOf(answer.get("error")));
         if (!(answer.get("pdf") instanceof String pdf)) throw new IllegalStateException("The engine's answer has no 'pdf'.");
         return Base64.getDecoder().decode(pdf);
@@ -62,15 +84,39 @@ final class WasmRunner {
 
     /** The XML of a document tree, {@code json}. */
     String kitToXml(String json) {
-        var answer = Json.readObject(run(Json.write(Map.of("method", "kit_to_xml", "input", json))));
+        var answer = Json.readObject(run(Json.write(Map.of("method", "kit_to_xml", "input", json)), RENDER));
         if (answer.containsKey("error")) throw new EngineException(String.valueOf(answer.get("error")));
         if (!(answer.get("xml") instanceof String xml)) throw new IllegalStateException("The engine's answer has no 'xml'.");
         return xml;
     }
 
+    /**
+     * The engine's {@code extract_invoice_data}: the values of {@code invoiceXml} read through {@code invoiceMap}, or
+     * the default map when it is null, as {@code { "data": …, "typed": […] }}.
+     */
+    Map<String, Object> extractInvoiceData(byte[] invoiceXml, String invoiceMap) {
+        var request = new LinkedHashMap<String, Object>();
+        request.put("method", "extract_invoice_data");
+        request.put("max_memory_mb", maxMemoryMb);
+        request.put("invoice_xml", Base64.getEncoder().encodeToString(invoiceXml));
+        request.put("invoice_map", invoiceMap);
+        var answer = Json.readObject(run(Json.write(request), INVOICE_READ));
+        if (answer.containsKey("error")) throw new EngineException(String.valueOf(answer.get("error")));
+        if (!(answer.get("data") instanceof Map)) throw new IllegalStateException("The engine's answer has no 'data'.");
+        if (!(answer.get("typed") instanceof List)) throw new IllegalStateException("The engine's answer has no 'typed'.");
+        return answer;
+    }
+
+    /** The engine's default invoice map, as XML text. */
+    String defaultInvoiceMap() {
+        var answer = Json.readObject(run(Json.write(Map.of("method", "default_invoice_map")), RENDER));
+        if (!(answer.get("map") instanceof String map)) throw new IllegalStateException("The engine's answer has no 'map'.");
+        return map;
+    }
+
     /** What this build of the engine makes of {@code key}. */
     Map<String, Object> checkLicense(String key) {
-        return Json.readObject(run(Json.write(Map.of("method", "check_license", "key", key, "now", now()))));
+        return Json.readObject(run(Json.write(Map.of("method", "check_license", "key", key, "now", now())), RENDER));
     }
 
     /**
@@ -86,23 +132,26 @@ final class WasmRunner {
 
     /**
      * The engine's answer to {@code request}, on the caller's thread. Past the timeout, a timer interrupts the thread,
-     * which stops the module within about a millisecond, and the next call on any engine runs as usual.
+     * which stops the module within about a millisecond, and the next call on any engine runs as usual. The errors of
+     * the runner name the call as {@code what}: {@link #RENDER} or {@link #INVOICE_READ}.
      */
-    private String run(String request) {
+    private String run(String request, String what) {
         if (timeout == 0) {
             try {
-                return execute(request);
+                return execute(request, what);
             } catch (WasmInterruptedException e) {
-                throw interrupted(e);
+                throw interrupted(e, what);
             }
         }
         var deadline = new Deadline(Thread.currentThread());
         var timer = Timer.INSTANCE.schedule(deadline::expire, timeout, TimeUnit.SECONDS);
         try {
-            return execute(request);
+            return execute(request, what);
         } catch (WasmInterruptedException e) {
-            if (deadline.finish()) throw new EngineException("The render timed out after " + seconds(timeout) + ".", e);
-            throw interrupted(e);
+            if (deadline.finish()) {
+                throw new EngineException("The " + what + " timed out after " + seconds(timeout) + ".", e);
+            }
+            throw interrupted(e, what);
         } finally {
             timer.cancel(false);
             // A deadline that passed just as the module finished interrupted nothing that runs; its flag is cleared.
@@ -110,7 +159,7 @@ final class WasmRunner {
         }
     }
 
-    private String execute(String request) {
+    private String execute(String request, String what) {
         var stdout = new ByteArrayOutputStream();
         var stderr = new ByteArrayOutputStream();
         var options = WasiOptions.builder()
@@ -138,16 +187,19 @@ final class WasmRunner {
         } catch (OutOfMemoryError e) {
             // The engine's memory is on the JVM's heap, in pages Endive allocates as it grows, so a heap with less room
             // than the cap runs out first. The instance is dropped here, and its memory with it.
-            throw new EngineException("The JVM's heap ran out during the render, before its cap of " + maxMemoryMb
-                    + " MB stopped it: give the JVM more heap (-Xmx) or set a lower maxMemoryMb.", e);
+            var advice = capOfOptions
+                    ? "give the JVM more heap (-Xmx) or set a lower maxMemoryMb."
+                    : "give the JVM more heap (-Xmx).";
+            throw new EngineException("The JVM's heap ran out during the " + what + ", before its cap of " + maxMemoryMb
+                    + " MB stopped it: " + advice, e);
         }
         return stdout.toString(StandardCharsets.UTF_8);
     }
 
     /** The error of a call stopped by an interrupt other than its deadline's, such as the app's own, which stays set. */
-    private static EngineException interrupted(WasmInterruptedException e) {
+    private static EngineException interrupted(WasmInterruptedException e, String what) {
         Thread.currentThread().interrupt();
-        return new EngineException("The render was interrupted.", e);
+        return new EngineException("The " + what + " was interrupted.", e);
     }
 
     private static String seconds(int count) {
