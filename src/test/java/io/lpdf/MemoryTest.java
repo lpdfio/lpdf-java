@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
@@ -181,14 +182,33 @@ class MemoryTest {
         assertInstanceOf(OutOfMemoryError.class, error.getCause());
     }
 
-    /** An engine with a cap of 512 MB whose module grows its memory on a heap that has no room for it. */
+    /**
+     * The runner of {@code extractInvoiceData}, made as {@link LCrossIndustryInvoice} makes it, on the stand-in: the call
+     * takes no engine, so there is no maxMemoryMb to lower.
+     */
+    @Test
+    void a_heap_that_runs_out_during_extract_invoice_data_advises_more_heap_alone() {
+        var runner = WasmRunner.withoutEngine(fullHeapModule());
+
+        var error = assertThrows(EngineException.class,
+                () -> runner.extractInvoiceData("<invoice/>".getBytes(StandardCharsets.UTF_8), null));
+
+        assertEquals("The JVM's heap ran out during the reading of the invoice, before its cap of 1024 MB stopped it: "
+                + "give the JVM more heap (-Xmx).", error.getMessage());
+        assertInstanceOf(OutOfMemoryError.class, error.getCause());
+    }
+
+    /** An engine with a cap of 512 MB on {@link #fullHeapModule()}. */
     private static PdfEngine fullHeapEngine() {
+        var options = new EngineOptions().maxMemoryMb(512);
+        return new PdfEngine(options, new WasmRunner(fullHeapModule(), options.timeout(), options.maxMemoryMb()));
+    }
+
+    /** A stand-in module that grows its memory on a heap that has no room for it. */
+    private static Supplier<Instance.Builder> fullHeapModule() {
         var module = Parser.parse(Wat2Wasm.parse(
                 "(module (memory 1) (func (export \"_start\") (drop (memory.grow (i32.const 1)))))"));
-        var options = new EngineOptions().maxMemoryMb(512);
-        return new PdfEngine(options, new WasmRunner(
-                () -> Instance.builder(module).withMemoryFactory(MemoryTest::fullHeap),
-                options.timeout(), options.maxMemoryMb()));
+        return () -> Instance.builder(module).withMemoryFactory(MemoryTest::fullHeap);
     }
 
     /** Endive's memory on a heap with no room for another page: growing it throws, as Endive's does then. */

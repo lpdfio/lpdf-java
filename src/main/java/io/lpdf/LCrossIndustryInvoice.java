@@ -23,7 +23,7 @@ public final class LCrossIndustryInvoice {
      * The runner of {@link #extractInvoiceData(byte[], ExtractInvoiceDataOptions)} and {@link #defaultInvoiceMap()},
      * which take no engine: the default time and memory limits. {@code generatePdf} reads through its engine instead.
      */
-    private static final WasmRunner READER = new WasmRunner(new EngineOptions().timeout(), new EngineOptions().maxMemoryMb());
+    private static final WasmRunner READER = WasmRunner.withoutEngine(WasmRunner.ENGINE);
 
     private LCrossIndustryInvoice() {
     }

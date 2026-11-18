@@ -37,6 +37,8 @@ final class WasmRunner {
     private final Supplier<Instance.Builder> module;
     private final int timeout;
     private final int maxMemoryMb;
+    /** Whether the caller's options set the cap, so that the heap's error may advise a lower one. */
+    private final boolean capOfOptions;
 
     /**
      * @param timeout     the seconds a call may run before it stops with an {@link EngineException}, or 0 for no limit
@@ -48,9 +50,23 @@ final class WasmRunner {
 
     /** A runner of {@code module} in place of the engine: for the tests, a module that runs long, or crashes. */
     WasmRunner(Supplier<Instance.Builder> module, int timeout, int maxMemoryMb) {
+        this(module, timeout, maxMemoryMb, true);
+    }
+
+    private WasmRunner(Supplier<Instance.Builder> module, int timeout, int maxMemoryMb, boolean capOfOptions) {
         this.module = module;
         this.timeout = timeout;
         this.maxMemoryMb = maxMemoryMb;
+        this.capOfOptions = capOfOptions;
+    }
+
+    /**
+     * A runner of {@code module} for the calls that take no engine, such as
+     * {@link LCrossIndustryInvoice#extractInvoiceData(byte[], ExtractInvoiceDataOptions)}: the default timeout and cap,
+     * which no option of the caller's sets, so its heap's error advises more heap alone.
+     */
+    static WasmRunner withoutEngine(Supplier<Instance.Builder> module) {
+        return new WasmRunner(module, EngineOptions.DEFAULT_TIMEOUT, EngineOptions.DEFAULT_MAX_MEMORY_MB, false);
     }
 
     // ── Calls ─────────────────────────────────────────────────────────────────
@@ -171,8 +187,11 @@ final class WasmRunner {
         } catch (OutOfMemoryError e) {
             // The engine's memory is on the JVM's heap, in pages Endive allocates as it grows, so a heap with less room
             // than the cap runs out first. The instance is dropped here, and its memory with it.
+            var advice = capOfOptions
+                    ? "give the JVM more heap (-Xmx) or set a lower maxMemoryMb."
+                    : "give the JVM more heap (-Xmx).";
             throw new EngineException("The JVM's heap ran out during the " + what + ", before its cap of " + maxMemoryMb
-                    + " MB stopped it: give the JVM more heap (-Xmx) or set a lower maxMemoryMb.", e);
+                    + " MB stopped it: " + advice, e);
         }
         return stdout.toString(StandardCharsets.UTF_8);
     }
