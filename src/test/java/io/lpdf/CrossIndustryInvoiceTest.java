@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * {@link LCrossIndustryInvoice}: a Factur-X / ZUGFeRD invoice PDF made from the invoice's XML. The template, the
@@ -71,6 +73,20 @@ class CrossIndustryInvoiceTest {
         var line = xml.substring(start, xml.indexOf(close) + close.length());
         var end = xml.lastIndexOf(close) + close.length();
         return (xml.substring(0, start) + line.repeat(count) + xml.substring(end)).getBytes(StandardCharsets.UTF_8);
+    }
+
+    /** An engine whose module writes {@code json} as its answer, whatever it is asked, in place of the engine's own. */
+    private static PdfEngine answering(String json) {
+        return TimeoutTest.standIn("""
+                (module
+                  (import "wasi_snapshot_preview1" "fd_write" (func $write (param i32 i32 i32 i32) (result i32)))
+                  (memory (export "memory") 1)
+                  (data (i32.const 32) "%s")
+                  (func (export "_start")
+                    (i32.store (i32.const 16) (i32.const 32))
+                    (i32.store (i32.const 20) (i32.const %d))
+                    (drop (call $write (i32.const 1) (i32.const 16) (i32.const 1) (i32.const 24)))))
+                """.formatted(json.replace("\"", "\\\""), json.length()), new EngineOptions());
     }
 
     private static final Map<String, Map<String, String>> CODE_NAMES = Map.of(
@@ -272,6 +288,15 @@ class CrossIndustryInvoiceTest {
                 invoice("en16931.xml"), new ExtractInvoiceDataOptions().format(format)));
         assertEquals("format.code returned null for 'lines.unit': return the text to bind, or the value as it came.",
                 error.getMessage());
+    }
+
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {"{}|data", "{\"data\": {}}|typed"})
+    void refuses_an_answer_of_the_engine_that_lacks_the_data_or_the_typed_values(String answer, String missing) {
+        var options = new GeneratePdfOptions().invoiceXml("<invoice/>".getBytes(StandardCharsets.UTF_8)).createdOn(CREATED_ON);
+        var error = assertThrows(IllegalStateException.class,
+                () -> LCrossIndustryInvoice.generatePdf(answering(answer), TimeoutTest.MINIMAL, options));
+        assertEquals("The engine's answer has no '" + missing + "'.", error.getMessage());
     }
 
     @Test

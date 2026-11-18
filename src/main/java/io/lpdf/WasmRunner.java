@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -81,6 +82,8 @@ final class WasmRunner {
         request.put("invoice_map", invoiceMap);
         var answer = Json.readObject(run(Json.write(request)));
         if (answer.containsKey("error")) throw new EngineException(String.valueOf(answer.get("error")));
+        if (!(answer.get("data") instanceof Map)) throw new IllegalStateException("The engine's answer has no 'data'.");
+        if (!(answer.get("typed") instanceof List)) throw new IllegalStateException("The engine's answer has no 'typed'.");
         return answer;
     }
 
