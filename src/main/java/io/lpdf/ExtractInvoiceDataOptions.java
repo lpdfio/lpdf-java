@@ -18,6 +18,7 @@ public final class ExtractInvoiceDataOptions {
         return this;
     }
 
+    /** The map, or null for Lpdf's default map. */
     public String invoiceMap() {
         return invoiceMap;
     }
@@ -28,6 +29,7 @@ public final class ExtractInvoiceDataOptions {
         return this;
     }
 
+    /** The format functions, or null: every value as the invoice has it. */
     public InvoiceFormat format() {
         return format;
     }

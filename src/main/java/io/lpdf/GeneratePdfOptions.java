@@ -15,6 +15,7 @@ public final class GeneratePdfOptions {
     private Object data;
     private String createdOn;
 
+    /** No options yet: set the invoice's XML and the creation date, which {@code generatePdf} requires. */
     public GeneratePdfOptions() {
     }
 
@@ -24,6 +25,7 @@ public final class GeneratePdfOptions {
         return this;
     }
 
+    /** The invoice's XML, or null. */
     public byte[] invoiceXml() {
         return invoiceXml;
     }
@@ -37,6 +39,7 @@ public final class GeneratePdfOptions {
         return this;
     }
 
+    /** The map, or null for Lpdf's default map. */
     public String invoiceMap() {
         return invoiceMap;
     }
@@ -47,6 +50,7 @@ public final class GeneratePdfOptions {
         return this;
     }
 
+    /** The format functions, or null: every value bound as the invoice has it. */
     public InvoiceFormat format() {
         return format;
     }
@@ -60,6 +64,7 @@ public final class GeneratePdfOptions {
         return this;
     }
 
+    /** The values the XML lacks, or null. */
     public Object data() {
         return data;
     }
@@ -70,6 +75,7 @@ public final class GeneratePdfOptions {
         return this;
     }
 
+    /** The creation date, or null. */
     public String createdOn() {
         return createdOn;
     }
