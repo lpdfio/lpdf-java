@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -258,18 +257,11 @@ class CrossIndustryInvoiceTest {
         var invoiceXml = invoiceWithLines(1_000);
         assertTrue(invoiceXml.length > 1_048_576);
         assertEquals(1_000, list(LCrossIndustryInvoice.extractInvoiceData(invoiceXml).get("lines")).size());
-        var formatted = new AtomicInteger();
-        var format = new InvoiceFormat().amount((value, entryName) -> {
-            formatted.incrementAndGet();
-            return value;
-        });
         var error = assertThrows(EngineException.class, () -> LCrossIndustryInvoice.generatePdf(
                 engine(new EngineOptions().maxMemoryMb(1)), template(), new GeneratePdfOptions()
-                        .invoiceXml(invoiceXml).format(format).data(Map.of("note", NOTE)).createdOn(CREATED_ON)));
-        assertTrue(error.getMessage().startsWith("the render needs more memory than its cap of 1 MB"), error.getMessage());
-        // The read itself was refused: read under the default limits, it would have handed the amounts to the format
-        // function before the render failed.
-        assertEquals(0, formatted.get());
+                        .invoiceXml(invoiceXml).data(Map.of("note", NOTE)).createdOn(CREATED_ON)));
+        assertTrue(error.getMessage().startsWith("the reading of the invoice needs more memory than its cap of 1 MB"),
+                error.getMessage());
     }
 
     @Test
