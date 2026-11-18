@@ -269,6 +269,27 @@ public final class PdfEngine {
 
     // ── Requests ──────────────────────────────────────────────────────────────
 
+    /**
+     * {@link LCrossIndustryInvoice#generatePdf(PdfEngine, String, GeneratePdfOptions)}: a render of a template with
+     * {@code invoice}, its XML as base64, the map and the values read from it.
+     */
+    byte[] renderInvoice(String template, Map<String, Object> invoice, Object data, String createdOn) {
+        var request = request("render_pdf", template, Sources.ofXml(template), new RenderOptions().createdOn(createdOn));
+        if (data != null) request.put("data", new Json.Data(data));
+        request.put("invoice", invoice);
+        return wasm.pdf(request);
+    }
+
+    /**
+     * {@link LCrossIndustryInvoice#generatePdf(PdfEngine, PdfDocument, GeneratePdfOptions)}: a render of a document
+     * built in code with {@code invoice}, its XML as base64.
+     */
+    byte[] renderInvoice(PdfDocument document, Map<String, Object> invoice, String createdOn) {
+        var request = request("render_tree_pdf", Json.write(document), Sources.ofTree(document), new RenderOptions().createdOn(createdOn));
+        request.put("invoice", invoice);
+        return wasm.pdf(request);
+    }
+
     /** A render's request: the input, the files it names and the loaded ones, and the options of the render. */
     private Map<String, Object> request(String method, String input, Sources sources, RenderOptions options) {
         var reader = this.options.srcFallback();

@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +67,28 @@ final class WasmRunner {
         if (answer.containsKey("error")) throw new EngineException(String.valueOf(answer.get("error")));
         if (!(answer.get("xml") instanceof String xml)) throw new IllegalStateException("The engine's answer has no 'xml'.");
         return xml;
+    }
+
+    /**
+     * The engine's {@code extract_invoice_data}: the values of {@code invoiceXml} read through {@code invoiceMap}, or
+     * the default map when it is null, as {@code { "data": …, "typed": […] }}.
+     */
+    Map<String, Object> extractInvoiceData(byte[] invoiceXml, String invoiceMap) {
+        var request = new LinkedHashMap<String, Object>();
+        request.put("method", "extract_invoice_data");
+        request.put("max_memory_mb", maxMemoryMb);
+        request.put("invoice_xml", Base64.getEncoder().encodeToString(invoiceXml));
+        request.put("invoice_map", invoiceMap);
+        var answer = Json.readObject(run(Json.write(request)));
+        if (answer.containsKey("error")) throw new EngineException(String.valueOf(answer.get("error")));
+        return answer;
+    }
+
+    /** The engine's default invoice map, as XML text. */
+    String defaultInvoiceMap() {
+        var answer = Json.readObject(run(Json.write(Map.of("method", "default_invoice_map"))));
+        if (!(answer.get("map") instanceof String map)) throw new IllegalStateException("The engine's answer has no 'map'.");
+        return map;
     }
 
     /** What this build of the engine makes of {@code key}. */
