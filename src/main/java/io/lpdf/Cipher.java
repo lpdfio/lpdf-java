@@ -2,7 +2,10 @@
 // Do not edit: change the schema and run `make gen-sdk-api`.
 package io.lpdf;
 
-/** The values of the <code>encrypt</code> attribute of the output: the cipher the PDF is encrypted with. */
+/**
+ * The cipher a PDF is encrypted with: AES-256, or RC4-128 for readers that cannot open AES-256. PDF 2.0 deprecates
+ * RC4-128.
+ */
 public final class Cipher {
     private Cipher() {
     }

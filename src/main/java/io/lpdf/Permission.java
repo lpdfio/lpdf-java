@@ -3,8 +3,9 @@
 package io.lpdf;
 
 /**
- * The words of the <code>allow</code> attribute of the output, separated by spaces: what a reader of an encrypted PDF
- * may do.
+ * What a reader of an encrypted PDF may do without the owner password: all of what follows, or print (at full quality),
+ * modify, copy, annotate, fill in forms, extract text for accessibility tools, and assemble (insert, delete and rotate
+ * pages).
  */
 public final class Permission {
     private Permission() {

@@ -2,7 +2,7 @@
 // Do not edit: change the schema and run `make gen-sdk-api`.
 package io.lpdf;
 
-/** The values of the <code>footnote-counter</code> attribute of a document or a section. */
+/** Where the numbers of the footnotes start over: on every page, in every section, or never. */
 public final class FootnoteCounter {
     private FootnoteCounter() {
     }

@@ -31,17 +31,17 @@ import static io.lpdf.L.NoAttr;
 
 var engine = L.engine();
 
-var doc = L.document(new DocumentAttr().size("letter"), List.of(
+var doc = L.document(new DocumentAttr().size(PageSize.LETTER), List.of(
     L.section(NoAttr, List.of(
         L.layout(new LayoutAttr().margin("48pt"), List.of(
             L.column(new ColumnAttr().gap("24pt"), List.of(
-                L.row(new RowAttr().justify("between"), List.of(
+                L.row(new RowAttr().justify(BoxJustify.BETWEEN), List.of(
                     L.text(new TextAttr().fontSize("8pt").color("#888888"), List.of("ACME CORP")),
                     L.text(new TextAttr().fontSize("22pt").bold(true), List.of("Project Proposal"))
                 )),
                 L.divider(new DividerAttr().thickness("xs")),
                 L.text(new TextAttr().fontSize("13pt").bold(true), List.of("Scope of Work")),
-                L.row(new RowAttr().gap("12pt").align("start"), List.of(
+                L.row(new RowAttr().gap("12pt").align(BoxAlign.START), List.of(
                     L.text(new TextAttr().color("#888888").width("24pt"), List.of("01")),
                     L.text(new TextAttr().width("fill"), List.of("Discovery & Research"))
                 ))

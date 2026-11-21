@@ -2,7 +2,11 @@
 // Do not edit: change the schema and run `make gen-sdk-api`.
 package io.lpdf;
 
-/** The values of the <code>relationship</code> attribute of a file the PDF carries: how it relates to the document. */
+/**
+ * How a file the PDF carries relates to the document: source, the file the document was made from; data, the data its
+ * pages show, such as the XML of an e-invoice; alternative, the same content in another form; supplement, more than the
+ * pages show; or unspecified.
+ */
 public final class FileRelationship {
     private FileRelationship() {
     }

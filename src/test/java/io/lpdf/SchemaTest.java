@@ -127,6 +127,46 @@ class SchemaTest {
         assertEquals("Times-Bold", BuiltinFont.TIMES_BOLD);
     }
 
+    @Test
+    void a_value_that_starts_with_a_digit_takes_the_last_word_of_its_enumerations_name() {
+        assertEquals(List.of("2a", "2b", "2u", "3a", "3b", "3u"),
+                List.of(PdfALevel.LEVEL_2A, PdfALevel.LEVEL_2B, PdfALevel.LEVEL_2U, PdfALevel.LEVEL_3A, PdfALevel.LEVEL_3B, PdfALevel.LEVEL_3U));
+        assertEquals("1", PdfUaPart.PART_1);
+        assertEquals("4", PdfXVersion.VERSION_4);
+        assertEquals(List.of("0", "8"), List.of(Pdf417EcLevel.LEVEL_0, Pdf417EcLevel.LEVEL_8));
+        assertEquals("gs1-128", BarcodeType.GS1_128);
+        assertEquals("gs1-datamatrix", BarcodeType.GS1_DATAMATRIX);
+    }
+
+    @Test
+    void the_constants_of_the_closed_enumerations_are_the_words_the_schema_reads() {
+        assertEquals(List.of("a4", "a3", "a5", "letter", "legal"),
+                List.of(PageSize.A4, PageSize.A3, PageSize.A5, PageSize.LETTER, PageSize.LEGAL));
+        assertEquals(List.of("left", "center", "right", "justify"),
+                List.of(TextAlign.LEFT, TextAlign.CENTER, TextAlign.RIGHT, TextAlign.JUSTIFY));
+        assertEquals(List.of("no", "break-before", "break-after", "keep-next"),
+                List.of(Paginate.NO, Paginate.BREAK_BEFORE, Paginate.BREAK_AFTER, Paginate.KEEP_NEXT));
+        assertEquals("top-left", Anchor.TOP_LEFT);
+        assertEquals("stretch", BoxAlign.STRETCH);
+        assertEquals("between", BoxJustify.BETWEEN);
+        assertEquals(List.of("start", "center", "end"), List.of(Align.START, Align.CENTER, Align.END));
+        assertEquals("middle", CellVAlign.MIDDLE);
+        assertEquals("lower-roman", ListFormat.LOWER_ROMAN);
+        assertEquals("H", QrEcLevel.H);
+        assertEquals("print", Ocg.PRINT);
+        assertEquals("fit", StampScale.FIT);
+    }
+
+    @Test
+    void a_document_built_with_the_constants_renders_as_the_xml_with_their_words() {
+        var built = L.document(new DocumentAttr().size(PageSize.A4).orientation(Orientation.LANDSCAPE), List.of(
+                L.section(NoAttr, List.of(L.layout(NoAttr, List.of(
+                        L.text(new TextAttr().align(TextAlign.CENTER).paginate(Paginate.KEEP_NEXT), List.of("x")),
+                        L.barcode(new BarcodeAttr().type(BarcodeType.QR).data("x").ec(QrEcLevel.H).height("40pt"))))))));
+        var xml = "<lpdf version=\"1\"><document size=\"a4\" orientation=\"landscape\"><section><layout><text align=\"center\" paginate=\"keep-next\">x</text><barcode type=\"qr\" data=\"x\" ec=\"H\" height=\"40pt\"/></layout></section></document></lpdf>";
+        assertEquals(render(xml), render(built));
+    }
+
     // ── Layers ────────────────────────────────────────────────────────────────
 
     @Test
