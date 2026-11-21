@@ -47,7 +47,8 @@ public final class StampAttr extends Attributes {
     /**
      * The point of the page the box is placed from, and the point of the box that goes there: <code>top-left</code>,
      * <code>top-center</code>, <code>top-right</code>, <code>center-left</code>, <code>center</code>,
-     * <code>center-right</code>, <code>bottom-left</code>, <code>bottom-center</code> or <code>bottom-right</code> (<code>Anchor</code>).
+     * <code>center-right</code>, <code>bottom-left</code>, <code>bottom-center</code> or <code>bottom-right</code>
+     * (<code>Anchor</code>).
      */
     public StampAttr anchor(String anchor) {
         set("anchor", anchor);
