@@ -2,7 +2,7 @@
 // Do not edit: change the schema and run `make gen-sdk-api`.
 package io.lpdf;
 
-/** The values of the <code>grow</code> attribute of a section: the sizes its page grows in to fit its content. */
+/** The sizes a section's page grows in to fit its content: width, height, or both. */
 public final class Grow {
     private Grow() {
     }

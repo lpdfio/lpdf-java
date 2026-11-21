@@ -47,7 +47,7 @@ public final class StampAttr extends Attributes {
     /**
      * The point of the page the box is placed from, and the point of the box that goes there: <code>top-left</code>,
      * <code>top-center</code>, <code>top-right</code>, <code>center-left</code>, <code>center</code>,
-     * <code>center-right</code>, <code>bottom-left</code>, <code>bottom-center</code> or <code>bottom-right</code>.
+     * <code>center-right</code>, <code>bottom-left</code>, <code>bottom-center</code> or <code>bottom-right</code> (<code>Anchor</code>).
      */
     public StampAttr anchor(String anchor) {
         set("anchor", anchor);
@@ -66,13 +66,13 @@ public final class StampAttr extends Attributes {
         return this;
     }
 
-    /** Where the image sits across the box, in the room it leaves: <code>start</code>, <code>center</code> (the default) or <code>end</code>. */
+    /** Where the image sits across the box, in the room it leaves: <code>start</code>, <code>center</code> (the default) or <code>end</code> (<code>Align</code>). */
     public StampAttr align(String align) {
         set("align", align);
         return this;
     }
 
-    /** Where the image sits down the box, in the room it leaves: <code>start</code>, <code>center</code> (the default) or <code>end</code>. */
+    /** Where the image sits down the box, in the room it leaves: <code>start</code>, <code>center</code> (the default) or <code>end</code> (<code>Align</code>). */
     public StampAttr justify(String justify) {
         set("justify", justify);
         return this;
@@ -81,7 +81,7 @@ public final class StampAttr extends Attributes {
     /**
      * How the image is sized in the box, keeping its proportions: <code>fit</code> (the default) shrinks an image larger
      * than the box and keeps a smaller one at its natural size, from the resolution the PNG records, or a pixel to a
-     * point; <code>fill</code> takes the largest size that fits.
+     * point; <code>fill</code> takes the largest size that fits (<code>StampScale</code>).
      */
     public StampAttr scale(String scale) {
         set("scale", scale);
