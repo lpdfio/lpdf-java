@@ -140,8 +140,9 @@ class SchemaTest {
 
     @Test
     void the_constants_of_the_closed_enumerations_are_the_words_the_schema_reads() {
-        assertEquals(List.of("a4", "a3", "a5", "letter", "legal"),
-                List.of(PageSize.A4, PageSize.A3, PageSize.A5, PageSize.LETTER, PageSize.LEGAL));
+        assertEquals(List.of("a0", "a1", "a2", "a3", "a4", "a5", "a6", "b4", "b5", "letter", "legal", "tabloid"),
+                List.of(PageSize.A0, PageSize.A1, PageSize.A2, PageSize.A3, PageSize.A4, PageSize.A5, PageSize.A6,
+                        PageSize.B4, PageSize.B5, PageSize.LETTER, PageSize.LEGAL, PageSize.TABLOID));
         assertEquals(List.of("left", "center", "right", "justify"),
                 List.of(TextAlign.LEFT, TextAlign.CENTER, TextAlign.RIGHT, TextAlign.JUSTIFY));
         assertEquals(List.of("no", "break-before", "break-after", "keep-next"),
