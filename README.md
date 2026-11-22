@@ -2,7 +2,7 @@
 
 # io.lpdf:lpdf
 
-`io.lpdf:lpdf` is the Java SDK for [Lpdf](https://lpdf.io?utm_campaign=sdk-java&utm_medium=referral&utm_source=readme), the PDF engine that renders a document written in XML or built in code to the same PDF in every language.
+`io.lpdf:lpdf` is the [Lpdf](https://lpdf.io?utm_campaign=sdk-java&utm_medium=referral&utm_source=readme) Java SDK: render PDF documents from XML or from code.
 
 ## Installation
 
