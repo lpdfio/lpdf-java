@@ -2,7 +2,9 @@
 
 # io.lpdf:lpdf
 
-`io.lpdf:lpdf` is the [Lpdf](https://lpdf.io?utm_campaign=sdk-java&utm_medium=referral&utm_source=readme) Java SDK: render PDF documents from XML or from code.
+[Lpdf](https://lpdf.io?utm_campaign=sdk-java&utm_medium=referral&utm_source=readme) Java SDK: render PDF documents from XML or from code.
+
+With data binding, PDF/A, PDF/UA, PDF/X and Factur-X / ZUGFeRD.
 
 ## Installation
 

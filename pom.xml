@@ -11,7 +11,7 @@
   <packaging>jar</packaging>
 
   <name>Lpdf</name>
-  <description>Lpdf Java SDK: render PDF documents from XML or from code.</description>
+  <description>Lpdf Java SDK: render PDF documents from XML or from code. With data binding, PDF/A, PDF/UA, PDF/X and Factur-X / ZUGFeRD.</description>
   <url>https://lpdf.io</url>
 
   <licenses>
