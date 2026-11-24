@@ -35,7 +35,7 @@ class CrossIndustryInvoiceTest {
     private static final String RECHNUNG_MAP = "<cross-industry-invoice-map prefix=\"rechnung\">"
             + "<value name=\"nummer\" path=\"rsm:ExchangedDocument/ram:ID\"/></cross-industry-invoice-map>";
     private static final String RECHNUNG_TEMPLATE = "<lpdf version=\"1\"><assets><font name=\"body\" src=\"../assets/fonts/SourceSans3-Regular.otf\"/>"
-            + "</assets><document size=\"a4\" font=\"body\"><section><layout margin=\"48pt\">"
+            + "</assets><document size=\"A4\" font=\"body\"><section><layout margin=\"48pt\">"
             + "<text data-value=\"rechnung:nummer\">0000</text></layout></section></document></lpdf>";
 
     private static byte[] bytes(Path path) {
@@ -168,7 +168,7 @@ class CrossIndustryInvoiceTest {
         sums.add(L.row(new RowAttr().gap("xs"), List.of(
                 L.text(total, List.of("Total")), L.text(total, List.of(totals.get("gross"))), L.text(total, List.of(totals.get("currency"))))));
 
-        return L.document(new DocumentAttr().size("a4").font("body")
+        return L.document(new DocumentAttr().size("A4").font("body")
                         .assets(new DocumentAssets().fonts(List.of(new FontAttr().name("body").src("../assets/fonts/SourceSans3-Regular.otf"))))
                         .meta(new DocumentMeta().title("Invoice").author("Northwind Paper SAS").lang("en")),
                 List.of(L.section(NoAttr, List.of(L.layout(new LayoutAttr().margin("48pt"), List.of(

@@ -10,7 +10,7 @@ import java.util.List;
  * import java.util.List;
  * import static io.lpdf.L.NoAttr;
  *
- * var doc = L.document(new DocumentAttr().size("a4"), List.of(
+ * var doc = L.document(new DocumentAttr().size("A4"), List.of(
  *     L.section(NoAttr, List.of(
  *         L.layout(new LayoutAttr().margin("40pt"), List.of(
  *             L.text(new TextAttr().font("Helvetica-Bold"), List.of("Hello"))
