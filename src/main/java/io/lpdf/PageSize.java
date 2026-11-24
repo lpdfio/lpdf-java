@@ -10,16 +10,16 @@ public final class PageSize {
     private PageSize() {
     }
 
-    public static final String A0 = "a0";
-    public static final String A1 = "a1";
-    public static final String A2 = "a2";
-    public static final String A3 = "a3";
-    public static final String A4 = "a4";
-    public static final String A5 = "a5";
-    public static final String A6 = "a6";
-    public static final String B4 = "b4";
-    public static final String B5 = "b5";
-    public static final String LETTER = "letter";
-    public static final String LEGAL = "legal";
-    public static final String TABLOID = "tabloid";
+    public static final String A0 = "A0";
+    public static final String A1 = "A1";
+    public static final String A2 = "A2";
+    public static final String A3 = "A3";
+    public static final String A4 = "A4";
+    public static final String A5 = "A5";
+    public static final String A6 = "A6";
+    public static final String B4 = "B4";
+    public static final String B5 = "B5";
+    public static final String LETTER = "Letter";
+    public static final String LEGAL = "Legal";
+    public static final String TABLOID = "Tabloid";
 }

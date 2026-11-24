@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class SketchTest {
     @Test
     void the_invoice_of_the_design_compiles_and_renders() {
-        var doc = L.document(new DocumentAttr().size("a4"), List.of(
+        var doc = L.document(new DocumentAttr().size("A4"), List.of(
             L.section(NoAttr, List.of(
                 L.layout(new LayoutAttr().margin("40pt"), List.of(
                     L.column(new ColumnAttr().gap("m"), List.of(

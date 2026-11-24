@@ -101,7 +101,7 @@ class TextContentTest {
 
     @Test
     void a_text_of_strings_and_a_span_renders_as_a_tree_and_as_its_xml() {
-        var doc = L.document(new DocumentAttr().size("a4"), List.of(
+        var doc = L.document(new DocumentAttr().size("A4"), List.of(
                 L.section(NoAttr, List.of(
                         L.layout(NoAttr, List.of(
                                 L.text(new TextAttr().fontSize("14pt"),

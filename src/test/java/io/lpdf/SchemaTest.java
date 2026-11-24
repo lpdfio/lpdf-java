@@ -140,7 +140,7 @@ class SchemaTest {
 
     @Test
     void the_constants_of_the_closed_enumerations_are_the_words_the_schema_reads() {
-        assertEquals(List.of("a0", "a1", "a2", "a3", "a4", "a5", "a6", "b4", "b5", "letter", "legal", "tabloid"),
+        assertEquals(List.of("A0", "A1", "A2", "A3", "A4", "A5", "A6", "B4", "B5", "Letter", "Legal", "Tabloid"),
                 List.of(PageSize.A0, PageSize.A1, PageSize.A2, PageSize.A3, PageSize.A4, PageSize.A5, PageSize.A6,
                         PageSize.B4, PageSize.B5, PageSize.LETTER, PageSize.LEGAL, PageSize.TABLOID));
         assertEquals(List.of("left", "center", "right", "justify"),
@@ -164,7 +164,7 @@ class SchemaTest {
                 L.section(NoAttr, List.of(L.layout(NoAttr, List.of(
                         L.text(new TextAttr().align(TextAlign.CENTER).paginate(Paginate.KEEP_NEXT), List.of("x")),
                         L.barcode(new BarcodeAttr().type(BarcodeType.QR).data("x").ec(QrEcLevel.H).height("40pt"))))))));
-        var xml = "<lpdf version=\"1\"><document size=\"a4\" orientation=\"landscape\"><section><layout><text align=\"center\" paginate=\"keep-next\">x</text><barcode type=\"qr\" data=\"x\" ec=\"H\" height=\"40pt\"/></layout></section></document></lpdf>";
+        var xml = "<lpdf version=\"1\"><document size=\"A4\" orientation=\"landscape\"><section><layout><text align=\"center\" paginate=\"keep-next\">x</text><barcode type=\"qr\" data=\"x\" ec=\"H\" height=\"40pt\"/></layout></section></document></lpdf>";
         assertEquals(render(xml), render(built));
     }
 
@@ -237,8 +237,8 @@ class SchemaTest {
 
     @Test
     void a_layer_shape_is_drawn() {
-        var empty = L.document(new DocumentAttr().size("a4"), List.of(L.section(NoAttr, List.of(L.layer(NoAttr, List.of())))));
-        var drawn = L.document(new DocumentAttr().size("a4"), List.of(L.section(NoAttr, List.of(L.layer(NoAttr, List.of(
+        var empty = L.document(new DocumentAttr().size("A4"), List.of(L.section(NoAttr, List.of(L.layer(NoAttr, List.of())))));
+        var drawn = L.document(new DocumentAttr().size("A4"), List.of(L.section(NoAttr, List.of(L.layer(NoAttr, List.of(
                 L.rect(new RectAttr().x("50pt").y("50pt").width("200pt").height("100pt").fill("#ff0000"))))))));
 
         assertNotEquals(render(empty), render(drawn));
@@ -273,7 +273,7 @@ class SchemaTest {
 
     @Test
     void a_text_at_a_circle_and_the_margin_of_the_layout_are_written_as_their_xml() {
-        Function<String, PdfDocument> circleAt = x -> L.document(new DocumentAttr().size("a4"), List.of(L.section(NoAttr,
+        Function<String, PdfDocument> circleAt = x -> L.document(new DocumentAttr().size("A4"), List.of(L.section(NoAttr,
                 List.of(L.layer(NoAttr, List.of(L.circle(new CircleAttr().x(x).y("20pt").r("10pt").fill("#ff0000"))))))));
         var textAt = L.toXml(L.document(NoAttr, List.of(L.section(NoAttr, List.of(L.layer(NoAttr, List.of(
                 L.textAt(new TextAtAttr().x("10pt").y("20pt").maxLines(2).width("80pt"), List.of("Page {page} of {pages}")))))))));
@@ -299,7 +299,7 @@ class SchemaTest {
 
     @Test
     void a_built_document_renders_the_same_as_its_xml() {
-        var built = L.document(new DocumentAttr().size("a4"), List.of(L.section(NoAttr, List.of(
+        var built = L.document(new DocumentAttr().size("A4"), List.of(L.section(NoAttr, List.of(
                 L.layout(NoAttr, List.of(L.column(new ColumnAttr().gap("12pt"), List.of(
                         L.text(new TextAttr().align("right").bold(true), List.of("Title")),
                         L.text(NoAttr, List.of("Body ", L.span(new SpanAttr().bold(true), List.of("bold")), " text")),
@@ -425,7 +425,7 @@ class SchemaTest {
 
     @Test
     void a_bulk_table_renders_from_data_as_the_table_without_bulk_and_one_built_with_l_which_has_no_data_is_rejected() {
-        Function<String, String> xml = bulk -> "<lpdf version=\"1\"><document size=\"a4\"><section><layout margin=\"36pt\">"
+        Function<String, String> xml = bulk -> "<lpdf version=\"1\"><document size=\"A4\"><section><layout margin=\"36pt\">"
                 + "<table cols=\"1fr 2fr\"" + bulk + "><thead><td><text bold=\"true\">Date</text></td><td><text bold=\"true\">Amount"
                 + "</text></td></thead><tr data-source=\"entries\"><td><text data-value=\"date\">-</text></td><td><text "
                 + "data-value=\"amount\">-</text></td></tr></table><region pin=\"bottom\"><text align=\"right\">Page {page} of "

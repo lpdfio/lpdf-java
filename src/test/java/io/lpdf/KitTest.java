@@ -87,8 +87,8 @@ class KitTest {
         assertEquals("graph", L.section(new SectionAttr().ruling("graph"), List.of()).attrs().get("ruling"));
         assertEquals("l", L.text(new TextAttr().lineHeight("l"), List.of("A token")).attrs().get("line-height"));
         assertEquals(1.5, L.text(new TextAttr().lineHeight(1.5), List.of("A factor")).attrs().get("line-height"));
-        assertEquals(Map.of("size", "a4", "orientation", "landscape"),
-                L.document(new DocumentAttr().size("a4").orientation("landscape"), List.of()).attrs());
+        assertEquals(Map.of("size", "A4", "orientation", "landscape"),
+                L.document(new DocumentAttr().size("A4").orientation("landscape"), List.of()).attrs());
         assertEquals(Map.of("margin", "20pt 30pt"), L.layout(new LayoutAttr().margin("20pt 30pt"), List.of()).attrs());
         assertEquals(Map.of("col-width", "120pt", "cols", 3), L.grid(new GridAttr().colWidth("120pt").cols(3), List.of()).attrs());
     }
@@ -109,10 +109,10 @@ class KitTest {
     void a_section_holds_its_layout_and_its_layers() {
         var layout = L.layout(NoAttr, List.of(L.column(NoAttr, List.of())));
         var layer = L.layer(NoAttr, List.of(L.rect(new RectAttr().width("10pt").height("10pt"))));
-        var section = L.section(new SectionAttr().size("a4"), List.of(layer, layout));
+        var section = L.section(new SectionAttr().size("A4"), List.of(layer, layout));
 
         assertEquals("section", section.type());
-        assertEquals("a4", section.attrs().get("size"));
+        assertEquals("A4", section.attrs().get("size"));
         assertEquals(List.of(layer, layout), section.nodes());
     }
 
