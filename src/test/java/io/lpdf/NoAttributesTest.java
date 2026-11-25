@@ -18,13 +18,13 @@ import org.junit.jupiter.api.Test;
  */
 class NoAttributesTest {
     /** The builders that take no {@code NoAttr}, as the .NET SDK's attributes of them are not optional. */
-    private static final Set<String> NEED_ATTRIBUTES = Set.of("img", "shape", "barcode", "region", "field", "bookmark",
+    private static final Set<String> NEED_ATTRIBUTES = Set.of("img", "shape", "barcode", "chart", "region", "field", "bookmark",
             "link", "table", "rect", "line", "ellipse", "circle", "path", "textAt", "imgAt", "barcodeAt");
 
     @Test
     void every_builder_takes_no_attr_but_those_whose_attributes_cannot_be_left_out() {
         var wrong = new ArrayList<String>();
-        for (var builder : List.of(L.class, LMarkdown.class)) {
+        for (var builder : List.of(L.class, LMarkdown.class, LChart.class)) {
             for (var method : builder.getDeclaredMethods()) {
                 if (!Modifier.isPublic(method.getModifiers()) || method.getParameterCount() == 0) continue;
                 if (!method.getParameterTypes()[0].getSimpleName().endsWith("Attr")) continue;
