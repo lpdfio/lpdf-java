@@ -306,6 +306,15 @@ public final class L {
         return new BarcodeNode(required(attrs, "barcode"));
     }
 
+    /**
+     * Builds a <code>chart</code> drawn from numbers, written like a table: {@link LChart#series} are its columns, each
+     * {@link LChart#category} a row and each {@link LChart#value} a cell, a value for each series in the series' order.
+     * A chart with one series needs no series.
+     */
+    public static ChartNode chart(ChartAttr attrs, List<? extends ChartPart> nodes) {
+        return new ChartNode(required(attrs, "chart"), KitNode.children("chart", nodes));
+    }
+
     /** Builds a <code>region</code>: a block pinned to an edge or a corner of the page, over or under the flow. */
     public static RegionNode region(RegionAttr attrs, List<? extends Node> nodes) {
         return new RegionNode(required(attrs, "region"), KitNode.children("region", nodes));

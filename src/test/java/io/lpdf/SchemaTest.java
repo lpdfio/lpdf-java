@@ -747,6 +747,75 @@ class SchemaTest {
         assertEquals("%PDF-", new String(pdf, 0, 5, StandardCharsets.US_ASCII));
     }
 
+    // ── Charts ────────────────────────────────────────────────────────────────
+
+    private static PdfDocument revenueChart() {
+        return inLayout(L.chart(new ChartAttr().type(ChartType.BAR).height("180pt").prefix("$").legend(ChartLegend.TOP)
+                .thousandsMark(".").decimalMark(","), List.of(
+                LChart.series(new ChartSeriesAttr().label("Revenue").color("#1763cf")),
+                LChart.series(new ChartSeriesAttr().label("Costs")),
+                LChart.category(new ChartCategoryAttr().label("Q1"),
+                        List.of(LChart.value(NoAttr, List.of(120000)), LChart.value(NoAttr, List.of(95000.5)))),
+                LChart.category(new ChartCategoryAttr().label("Q2"),
+                        List.of(LChart.value(NoAttr, List.of("131000")), LChart.value(NoAttr))))));
+    }
+
+    @Test
+    void a_chart_its_series_its_categories_and_their_values_are_built_with_the_schema_names() {
+        var chart = L.chart(new ChartAttr().type(ChartType.BAR).height("100pt").valueLabels(true)
+                .direction(ChartDirection.HORIZONTAL), List.of());
+        assertEquals("chart", chart.type());
+        assertEquals(Map.of("type", "bar", "height", "100pt", "value-labels", true, "direction", "horizontal"), chart.attrs());
+        assertEquals(Map.of("label", "Revenue"), LChart.series(new ChartSeriesAttr().label("Revenue")).attrs());
+        var category = LChart.category(new ChartCategoryAttr().label("Q1"), List.of(LChart.value(NoAttr, List.of(41200))));
+        assertEquals("category", category.type());
+        assertEquals(List.of("41200"), ((ChartValueNode) category.nodes().get(0)).nodes());
+        assertEquals(List.of(), LChart.value(NoAttr).nodes());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0.25, 0.25", "-3.5, -3.5", "3.0, 3", "1e21, 1000000000000000000000", "1.5e-7, 0.00000015", "1e-7, 0.0000001",
+            "-0.0, 0"})
+    void a_number_of_a_value_is_written_in_full_with_no_exponent(double value, String text) {
+        assertEquals(List.of(text), LChart.value(NoAttr, List.of(value)).nodes());
+    }
+
+    @Test
+    void a_value_keeps_a_string_as_written_and_writes_a_long_and_a_big_decimal_in_full() {
+        assertEquals(List.of("0.250", "3000000000", "0.250"),
+                LChart.value(NoAttr, List.of("0.250", 3000000000L, new java.math.BigDecimal("0.250"))).nodes());
+    }
+
+    @Test
+    void a_float_of_a_value_is_written_from_its_own_shortest_digits() {
+        assertEquals(List.of("0.1", "1000000000000000000000", "0.00000015"),
+                LChart.value(NoAttr, List.of(0.1f, 1e21f, 1.5e-7f)).nodes());
+    }
+
+    @Test
+    void a_value_that_is_not_a_finite_number_or_a_string_is_refused() {
+        assertThrows(IllegalArgumentException.class, () -> LChart.value(NoAttr, List.of(Double.NaN)));
+        assertThrows(IllegalArgumentException.class, () -> LChart.value(NoAttr, List.of(true)));
+    }
+
+    @Test
+    void a_chart_renders_the_same_from_the_builder_and_its_xml() {
+        var xml = L.toXml(revenueChart());
+        assertTrue(xml.contains("<value>120000</value>"), xml);
+        assertTrue(xml.contains("<value>95000.5</value>"), xml);
+        assertTrue(Pattern.compile("<value\\s*/>").matcher(xml).find(), xml);
+        assertEquals(render(revenueChart()), render(xml));
+    }
+
+    @Test
+    void a_category_with_the_wrong_count_of_values_is_refused() {
+        var document = inLayout(L.chart(new ChartAttr().type(ChartType.BAR).height("100pt"), List.of(
+                LChart.series(NoAttr), LChart.series(NoAttr),
+                LChart.category(new ChartCategoryAttr().label("Q1"), List.of(LChart.value(NoAttr, List.of(1)))))));
+        var error = assertThrows(EngineException.class, () -> render(document));
+        assertTrue(error.getMessage().contains("category 'Q1' has 1 value, and the chart has 2 series"), error.getMessage());
+    }
+
     // ── Markdown ──────────────────────────────────────────────────────────────
 
     private static final String MARKDOWN_BODY = "# Release notes\n\nSome *emphasis*, **strong** text and `code`.\n\n- one\n- two\n\n> a quote\n";
