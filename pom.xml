@@ -265,6 +265,9 @@
               <publishingServerId>central</publishingServerId>
               <autoPublish>true</autoPublish>
               <waitUntil>published</waitUntil>
+              <!-- In seconds. Central can take more than the default half hour to publish a bundle, and a wait that
+                   runs out fails the job before its changelog commit and GitHub release. -->
+              <waitMaxTime>3600</waitMaxTime>
             </configuration>
           </plugin>
         </plugins>
