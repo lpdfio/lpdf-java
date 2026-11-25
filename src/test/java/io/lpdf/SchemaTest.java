@@ -787,6 +787,12 @@ class SchemaTest {
     }
 
     @Test
+    void a_float_of_a_value_is_written_from_its_own_shortest_digits() {
+        assertEquals(List.of("0.1", "1000000000000000000000", "0.00000015"),
+                LChart.value(NoAttr, List.of(0.1f, 1e21f, 1.5e-7f)).nodes());
+    }
+
+    @Test
     void a_value_that_is_not_a_finite_number_or_a_string_is_refused() {
         assertThrows(IllegalArgumentException.class, () -> LChart.value(NoAttr, List.of(Double.NaN)));
         assertThrows(IllegalArgumentException.class, () -> LChart.value(NoAttr, List.of(true)));
