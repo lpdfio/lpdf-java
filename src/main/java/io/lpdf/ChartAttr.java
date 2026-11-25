@@ -164,8 +164,9 @@ public final class ChartAttr extends Attributes {
     }
 
     /**
-     * Writes each value at the end of its bar or over its point, and the total of a stack at the end of the stack or
-     * over its top. Default false. A sparkline writes none.
+     * Writes each value at the end of its bar, or over its point and under a point lower than the points beside it,
+     * where its line doesn't run, and the total of a stack at the end of the stack or over its top. Default false. A
+     * sparkline writes none.
      */
     public ChartAttr valueLabels(boolean valueLabels) {
         set("value-labels", valueLabels);
@@ -174,8 +175,8 @@ public final class ChartAttr extends Attributes {
 
     /**
      * The width of every line of a line, an area or a sparkline chart, a length such as 2pt: 1.5pt by default, and 1pt
-     * for a sparkline. 0 draws no line, so an area is its fill alone. Which line is the current one and which the
-     * comparison is told by the series' color.
+     * for a sparkline. 0 draws no line, so an area is its fill alone. Every line takes the same width: which line is
+     * the current one and which the comparison is told by the series' color.
      */
     public ChartAttr strokeWidth(String strokeWidth) {
         set("stroke-width", strokeWidth);
