@@ -20,7 +20,7 @@ public final class LChart {
     private LChart() {
     }
 
-    /** Builds a series of a chart: its entry in the legend and the color of its bars. */
+    /** Builds a series of a chart: its entry in the legend and the color of its bars, line or area. */
     public static ChartSeriesNode series(ChartSeriesAttr attrs) {
         return new ChartSeriesNode(Attributes.of(attrs));
     }
@@ -43,7 +43,7 @@ public final class LChart {
     /**
      * Builds a value of a category: a number, written in full with no exponent and no locale, or a string that is one,
      * such as <code>"0.250"</code>, taken as written so its label keeps its decimals. An empty list is no value, which
-     * draws no bar. It has no attributes.
+     * draws no bar and breaks a line, an area or a sparkline; a stacked area counts it as zero. It has no attributes.
      *
      * @throws IllegalArgumentException when an item is not a number or a string, or a number is not finite
      */
@@ -55,7 +55,9 @@ public final class LChart {
         return new ChartValueNode(Collections.unmodifiableList(texts));
     }
 
-    /** Builds no value, which draws no bar. */
+    /**
+     * Builds no value, which draws no bar and breaks a line, an area or a sparkline; a stacked area counts it as zero.
+     */
     public static ChartValueNode value(NoAttributes attrs) {
         return value(attrs, List.of());
     }
